@@ -1,16 +1,19 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AdminArtistManagement from "../components/AdminArtistManagement";
 import AdminChatInbox from "../components/AdminChatInbox";
+import AdminDebugPanel from "../components/AdminDebugPanel";
 import AdminFeaturedArtistsManagement from "../components/AdminFeaturedArtistsManagement";
-import AdminMonthlyListenersManagement from "../components/AdminMonthlyListenersManagement";
+import AdminLabelPartnersManagement from "../components/AdminLabelPartnersManagement";
 import AdminPodcastSubmissions from "../components/AdminPodcastSubmissions";
 import AdminSubmissionsList from "../components/AdminSubmissionsList";
 import AdminSubscriptionPlansManagement from "../components/AdminSubscriptionPlansManagement";
+import AdminSupportRequestsManagement from "../components/AdminSupportRequestsManagement";
 import AdminTopVibingSongsManagement from "../components/AdminTopVibingSongsManagement";
-import AdminUserManagement from "../components/AdminUserManagement";
 import AdminUserRoleManagement from "../components/AdminUserRoleManagement";
+import AdminUsersPanel from "../components/AdminUsersPanel";
 import AdminVerificationList from "../components/AdminVerificationList";
 import AdminVideoSubmissions from "../components/AdminVideoSubmissions";
+import AdminWithdrawalRequestsManagement from "../components/AdminWithdrawalRequestsManagement";
 import { useGetChatThreads } from "../hooks/useQueries";
 
 function MessagesTabLabel() {
@@ -41,14 +44,23 @@ export default function AdminDashboard() {
           <TabsTrigger value="podcasts">Podcast Submission</TabsTrigger>
           <TabsTrigger value="videos">Video Submissions</TabsTrigger>
           <TabsTrigger value="verification">Verification List</TabsTrigger>
-          <TabsTrigger value="listeners">Monthly Listeners</TabsTrigger>
+          <TabsTrigger value="withdrawals" data-ocid="withdrawal.tab">
+            💸 Withdrawals
+          </TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="plans">Plans</TabsTrigger>
           <TabsTrigger value="featured">Featured Artists</TabsTrigger>
           <TabsTrigger value="topVibing">Top Vibing Songs</TabsTrigger>
+          <TabsTrigger value="labelPartners">Label Partners</TabsTrigger>
           <TabsTrigger value="adminroles">Admin Role Management</TabsTrigger>
           <TabsTrigger value="messages">
             <MessagesTabLabel />
+          </TabsTrigger>
+          <TabsTrigger value="debug" data-ocid="debug.tab">
+            🔧 Debug
+          </TabsTrigger>
+          <TabsTrigger value="generalSupport" data-ocid="admin.support.tab">
+            🎧 Support Requests
           </TabsTrigger>
         </TabsList>
 
@@ -72,12 +84,12 @@ export default function AdminDashboard() {
           <AdminVerificationList />
         </TabsContent>
 
-        <TabsContent value="listeners">
-          <AdminMonthlyListenersManagement />
+        <TabsContent value="withdrawals">
+          <AdminWithdrawalRequestsManagement />
         </TabsContent>
 
         <TabsContent value="users">
-          <AdminUserManagement />
+          <AdminUsersPanel />
         </TabsContent>
 
         <TabsContent value="plans">
@@ -92,12 +104,24 @@ export default function AdminDashboard() {
           <AdminTopVibingSongsManagement />
         </TabsContent>
 
+        <TabsContent value="labelPartners">
+          <AdminLabelPartnersManagement />
+        </TabsContent>
+
         <TabsContent value="adminroles">
           <AdminUserRoleManagement />
         </TabsContent>
 
         <TabsContent value="messages">
           <AdminChatInbox />
+        </TabsContent>
+
+        <TabsContent value="debug">
+          <AdminDebugPanel />
+        </TabsContent>
+
+        <TabsContent value="generalSupport">
+          <AdminSupportRequestsManagement />
         </TabsContent>
       </Tabs>
     </div>

@@ -1,0 +1,501 @@
+// Version: 1.0.0
+type ACRResult__561300352 = {music : Text; statusCode : Text};
+type ApprovalStatus__575141016 = {#approved; #pending; #rejected};
+type ArtistProfile__70559860 =
+  {
+    appleProfile : Text;
+    email : Text;
+    facebookLink : Text;
+    fullName : Text;
+    id : Text;
+    instagramLink : Text;
+    isApproved : Bool;
+    isVerified : Bool;
+    mobileNumber : Text;
+    owner : Principal;
+    profilePhoto : ExternalBlob__246066408;
+    profilePhotoFilename : Text;
+    spotifyProfile : Text;
+    stageName : Text;
+    youtubeChannelLink : Text
+  };
+type BlockedUser__1063697939 =
+  {podcastSubmissionBlocked : Bool; songSubmissionBlocked : Bool};
+type BlogPost__543622485 =
+  {
+    author : Principal;
+    content : Text;
+    id : Text;
+    media : ?ExternalBlob__246066408;
+    status : {#draft; #published};
+    timestamp : Time__900049286;
+    title : Text
+  };
+type CommunityMessage__336428597 =
+  {
+    content : Text;
+    fullName : Text;
+    id : Text;
+    role : Text;
+    timestamp : Time__900049286;
+    user : Principal
+  };
+type Data__791452850<K, V> =
+  {var count : Nat__490723111; kvs : [var ?(K, V)]};
+type EpisodeType__901904022 = {#bonus; #full; #trailer};
+type ExternalBlob__246066408 = Blob;
+type FeaturedArtistSong__828015716 = {link : Text; title : Text};
+type FeaturedArtist__344702406 =
+  {
+    aboutBlurb : Text;
+    artistName : Text;
+    id : Nat;
+    isActive : Bool;
+    photoUrl : Text;
+    slotIndex : Nat;
+    songs : [FeaturedArtistSong__828015716]
+  };
+type InstagramProfileConnection__432877303 =
+  {
+    id : Text;
+    instagramProfileLink : Text;
+    songId : Text;
+    submitter : Principal;
+    timestamp : Time__900049286
+  };
+type Int__270357528 = Int__616954475;
+type Int__616954475 = Int;
+type Internal__8484328<K, V> =
+  {children : [var ?Node__46230540<K, V>]; data : Data__791452850<K, V>};
+type InviteCode__761281821 =
+  {code : Text; created : Time__900049286; used : Bool};
+type LabelPartner__1974213 =
+  {
+    description : Text;
+    id : Nat;
+    labelName : Text;
+    logoUrl : Text;
+    websiteLink : ?Text
+  };
+type LabelRelease__281621245 =
+  {
+    artistName : Text;
+    artworkUrl : Text;
+    id : Nat;
+    labelId : Nat;
+    songTitle : Text;
+    streamingLink : Text
+  };
+type Language__38428764 =
+  {
+    #bengali;
+    #english;
+    #gujarati;
+    #hindi;
+    #kannada;
+    #malayalam;
+    #marathi;
+    #other;
+    #punjabi;
+    #tamil;
+    #telugu
+  };
+type Leaf__809889148<K, V> = {data : Data__791452850<K, V>};
+type Map__158565046<K, V> = Map__297112838<K, V>;
+type Map__297112838<K, V> =
+  {var root : Node__46230540<K, V>; var size : Nat__490723111};
+type Map__605269027<K, V> = Map__158565046<K, V>;
+type MonthlyListenerStats__455719398 = {month : Nat; value : Nat; year : Nat};
+type Nat__490723111 = Nat__920180692;
+type Nat__920180692 = Nat;
+type Node__46230540<K, V> =
+  {#internal : Internal__8484328<K, V>; #leaf : Leaf__809889148<K, V>};
+type PodcastCategory__948143613 =
+  {
+    #arts;
+    #business;
+    #comedy;
+    #education;
+    #healthFitness;
+    #kidsFamily;
+    #music;
+    #newsPolitics;
+    #other;
+    #religionSpirituality;
+    #science;
+    #sports;
+    #technology;
+    #tvFilm
+  };
+type PodcastEpisode__671092959 =
+  {
+    artwork : ExternalBlob__246066408;
+    createdBy : Principal;
+    description : Text;
+    episodeNumber : Nat;
+    episodeType : EpisodeType__901904022;
+    id : Text;
+    isEighteenPlus : Bool;
+    isExplicit : Bool;
+    isPromotional : Bool;
+    mediaFile : ExternalBlob__246066408;
+    moderationStatus : PodcastModerationStatus__1070167141;
+    seasonNumber : Nat;
+    showId : Text;
+    thumbnail : ExternalBlob__246066408;
+    timestamp : Time__900049286;
+    title : Text
+  };
+type PodcastModerationStatus__1070167141 =
+  {#approved; #live; #pending; #rejected};
+type PodcastShow__606758876 =
+  {
+    artwork : ExternalBlob__246066408;
+    category : PodcastCategory__948143613;
+    createdBy : Principal;
+    description : Text;
+    id : Text;
+    language : Language__38428764;
+    liveLink : ?Text;
+    moderationStatus : PodcastModerationStatus__1070167141;
+    podcastType : PodcastType__833072646;
+    timestamp : Time__900049286;
+    title : Text
+  };
+type PodcastType__833072646 = {#audio; #video};
+type RSVP__815186634 =
+  {
+    attending : Bool;
+    inviteCode : Text;
+    name : Text;
+    timestamp : Time__900049286
+  };
+type SongStatus__722970047 = {#approved; #draft; #live; #pending; #rejected};
+type SongSubmissionLegacy__776964808 =
+  {
+    acrResult : ?ACRResult__561300352;
+    additionalDetails : Text;
+    adminComment : Text;
+    adminLiveLink : ?Text;
+    adminRemarks : Text;
+    albumTracks : ?[TrackMetadata__519363687];
+    appleMusicLink : ?Text;
+    artist : Text;
+    artwork : ExternalBlob__246066408;
+    artworkFilename : Text;
+    audioFile : ExternalBlob__246066408;
+    audioFilename : Text;
+    composer : Text;
+    discountCode : ?Text;
+    featuredArtist : Text;
+    genre : Text;
+    id : Text;
+    isManuallyRejected : Bool;
+    language : Text;
+    liveStreamLink : ?Text;
+    lyricist : Text;
+    musicVideoLink : ?Text;
+    preSaveLink : ?Text;
+    producer : Text;
+    publicLink : ?Text;
+    releaseDate : Time__900049286;
+    releaseType : Text;
+    spotifyLink : ?Text;
+    status : SongStatus__722970047;
+    submitter : Principal;
+    timestamp : Time__900049286;
+    title : Text
+  };
+type SongSubmission__271414640 =
+  {
+    acrResult : ?ACRResult__561300352;
+    additionalDetails : Text;
+    adminComment : Text;
+    adminLiveLink : ?Text;
+    adminRemarks : Text;
+    albumTracks : ?[TrackMetadata__519363687];
+    appleMusicLink : ?Text;
+    artist : Text;
+    artwork : ExternalBlob__246066408;
+    artworkFilename : Text;
+    audioFile : ExternalBlob__246066408;
+    audioFilename : Text;
+    callerTuneStartSecond : ?Float;
+    composer : Text;
+    contentId : ?Bool;
+    contentType : ?Text;
+    customCLine : ?Text;
+    customPLine : ?Text;
+    discountCode : ?Text;
+    featuredArtist : Text;
+    genre : Text;
+    id : Text;
+    isManuallyRejected : Bool;
+    language : Text;
+    licenceFile : ?ExternalBlob__246066408;
+    licenceFilename : ?Text;
+    liveStreamLink : ?Text;
+    lyricist : Text;
+    musicVideoLink : ?Text;
+    preSaveLink : ?Text;
+    premiumLabel : ?Text;
+    producer : Text;
+    publicLink : ?Text;
+    releaseDate : Time__900049286;
+    releaseType : Text;
+    spotifyLink : ?Text;
+    status : SongStatus__722970047;
+    submitter : Principal;
+    sunoAgreementFile : ?ExternalBlob__246066408;
+    sunoAgreementFilename : ?Text;
+    sunoTrackLink : ?Text;
+    timestamp : Time__900049286;
+    title : Text
+  };
+type StripeConfiguration__96897619 =
+  {allowedCountries : [Text]; secretKey : Text};
+type SubscriptionPlan__552945260 =
+  {
+    benefits : [Text];
+    planName : Text;
+    pricePerYear : Nat;
+    redirectUrl : Text
+  };
+type SupportRequestStatus__130873965 =
+  {#inProgress; #pending; #rejected; #resolved};
+type SupportRequest__601056014 =
+  {
+    adminDecision : ?Bool;
+    adminNotes : Text;
+    details : Text;
+    id : Text;
+    publicLink : ?Text;
+    status : SupportRequestStatus__130873965;
+    submitter : Principal;
+    timestamp : Time__900049286;
+    type_ : Text
+  };
+type Time__796480547 = Int__270357528;
+type Time__900049286 = Time__796480547;
+type TopVibingSong__281726404 =
+  {
+    artistName : Text;
+    artworkUrl : Text;
+    genre : Text;
+    id : Nat;
+    rank : Nat;
+    streamingLink : Text;
+    tagline : ?Text;
+    title : Text
+  };
+type TrackMetadata__519363687 =
+  {
+    artist : Text;
+    audioFile : ExternalBlob__246066408;
+    audioFilename : Text;
+    composer : Text;
+    featuredArtist : Text;
+    lyricist : Text;
+    producer : Text;
+    title : Text
+  };
+type UserCategory__335575491 =
+  {#generalArtist; #generalLabel; #proArtist; #proLabel; #ultraArtist};
+type UserProfile__491224006 =
+  {artistId : Text; category : UserCategory__335575491; name : Text};
+type UserRole__1054455867 = {#admin; #guest; #user};
+type VerificationRequest__424982413 =
+  {
+    expiryExtensionDays : Nat;
+    id : Text;
+    status : VerificationStatus__397273111;
+    timestamp : Time__900049286;
+    user : Principal;
+    verificationApprovedTimestamp : ?Time__900049286
+  };
+type VerificationStatus__397273111 =
+  {#approved; #pending; #rejected; #waiting};
+type VideoSubmissionStatus__873682517 =
+  {#approved; #live; #pending; #rejected; #waiting};
+type VideoSubmission__609744329 =
+  {
+    artwork : ExternalBlob__246066408;
+    category : Text;
+    description : Text;
+    id : Text;
+    liveUrl : ?Text;
+    status : VideoSubmissionStatus__873682517;
+    submittedAt : Time__900049286;
+    tags : [Text];
+    thumbnail : ExternalBlob__246066408;
+    title : Text;
+    updatedAt : Time__900049286;
+    userId : Principal;
+    videoFile : ExternalBlob__246066408
+  };
+type WithdrawRequest__723197494 =
+  {
+    amount : Float;
+    fullName : Text;
+    googlePayAccountName : Text;
+    id : Text;
+    message : Text;
+    qrCodeBlob : ExternalBlob__246066408;
+    qrCodeFilename : Text;
+    rejectionReason : Text;
+    status : WithdrawStatus__589544267;
+    submitter : Principal;
+    timestamp : Time__900049286;
+    upiId : Text
+  };
+type WithdrawStatus__589544267 = {#approved; #pending; #rejected};
+type YouTubeCopyrightClaim__987922808 =
+  {
+    id : Text;
+    songId : Text;
+    submitter : Principal;
+    timestamp : Time__900049286;
+    youtubeChannelLink : Text
+  };
+actor {
+  stable accessControlState :
+    {
+      var adminAssigned : Bool;
+      userRoles : Map__605269027<Principal, UserRole__1054455867>
+    };
+  stable var annualMaintenanceFee : Int;
+  stable approvalState :
+    {
+      var approvalStatus :
+        Map__605269027<Principal, ApprovalStatus__575141016>
+    };
+  stable var artistProfileEditingAccessEnabled : Bool;
+  stable artistProfiles :
+    {
+      var root : Node__46230540<Text, ArtistProfile__70559860>;
+      var size : Nat__490723111
+    };
+  stable blockedUsers :
+    {
+      var root : Node__46230540<Principal, BlockedUser__1063697939>;
+      var size : Nat__490723111
+    };
+  stable blogPosts :
+    {
+      var root : Node__46230540<Text, BlogPost__543622485>;
+      var size : Nat__490723111
+    };
+  stable communityMessages :
+    {
+      var root : Node__46230540<Text, CommunityMessage__336428597>;
+      var size : Nat__490723111
+    };
+  stable var distributionFee : Int;
+  stable featuredArtists :
+    {
+      var root : Node__46230540<Nat, FeaturedArtist__344702406>;
+      var size : Nat__490723111
+    };
+  stable var globalAnnouncement : Text;
+  stable instagramProfileConnections :
+    {
+      var root : Node__46230540<Text, InstagramProfileConnection__432877303>;
+      var size : Nat__490723111
+    };
+  stable inviteState :
+    {
+      var inviteCodes : Map__605269027<Text, InviteCode__761281821>;
+      var rsvps : Map__605269027<Text, RSVP__815186634>
+    };
+  stable labelPartners :
+    {
+      var root : Node__46230540<Nat, LabelPartner__1974213>;
+      var size : Nat__490723111
+    };
+  stable var labelPartnersSize : Nat;
+  stable labelReleases :
+    {
+      var root : Node__46230540<Nat, LabelRelease__281621245>;
+      var size : Nat__490723111
+    };
+  stable var labelReleasesSize : Nat;
+  stable var lastVerificationCheckTime : Int;
+  stable monthlyListenerStats :
+    {
+      var root : Node__46230540<Text, [MonthlyListenerStats__455719398]>;
+      var size : Nat__490723111
+    };
+  stable podcastEpisodes :
+    {
+      var root : Node__46230540<Text, PodcastEpisode__671092959>;
+      var size : Nat__490723111
+    };
+  stable podcasts :
+    {
+      var root : Node__46230540<Text, PodcastShow__606758876>;
+      var size : Nat__490723111
+    };
+  stable premiumUsers :
+    {var root : Node__46230540<Principal, Bool>; var size : Nat__490723111};
+  stable songMonthlyListeners :
+    {var root : Node__46230540<Text, Float>; var size : Nat__490723111};
+  stable songRevenues :
+    {var root : Node__46230540<Text, Float>; var size : Nat__490723111};
+  stable var stripeConfiguration : ?StripeConfiguration__96897619;
+  stable submissions :
+    {
+      var root : Node__46230540<Text, SongSubmissionLegacy__776964808>;
+      var size : Nat__490723111
+    };
+  stable submissionsV2 :
+    {
+      var root : Node__46230540<Text, SongSubmission__271414640>;
+      var size : Nat__490723111
+    };
+  stable subscriptionPlans :
+    {
+      var root : Node__46230540<Text, SubscriptionPlan__552945260>;
+      var size : Nat__490723111
+    };
+  stable supportRequests :
+    {
+      var root : Node__46230540<Text, SupportRequest__601056014>;
+      var size : Nat__490723111
+    };
+  stable teamMembers :
+    {var root : Node__46230540<Principal, Bool>; var size : Nat__490723111};
+  stable topVibingSongs :
+    {
+      var root : Node__46230540<Nat, TopVibingSong__281726404>;
+      var size : Nat__490723111
+    };
+  stable var topVibingSongsSize : Nat;
+  stable userProfiles :
+    {
+      var root : Node__46230540<Principal, UserProfile__491224006>;
+      var size : Nat__490723111
+    };
+  stable verificationRequests :
+    {
+      var root : Node__46230540<Text, VerificationRequest__424982413>;
+      var size : Nat__490723111
+    };
+  stable videoSubmissions :
+    {
+      var root : Node__46230540<Text, VideoSubmission__609744329>;
+      var size : Nat__490723111
+    };
+  stable var websiteLogo : ?ExternalBlob__246066408;
+  stable withdrawRequests :
+    {
+      var root : Node__46230540<Text, WithdrawRequest__723197494>;
+      var size : Nat__490723111
+    };
+  stable withdrawnAmounts :
+    {var root : Node__46230540<Principal, Float>; var size : Nat__490723111};
+  stable youtubeCopyrightClaims :
+    {
+      var root : Node__46230540<Text, YouTubeCopyrightClaim__987922808>;
+      var size : Nat__490723111
+    }
+};

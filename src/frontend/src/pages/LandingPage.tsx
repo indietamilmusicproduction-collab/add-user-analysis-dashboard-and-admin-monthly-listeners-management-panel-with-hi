@@ -9,6 +9,7 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { Headphones, LogIn, Music, Users } from "lucide-react";
 import { useEffect, useState } from "react";
+import LabelPartnersSection from "../components/LabelPartnersSection";
 import MostVibingArtistsCarousel from "../components/MostVibingArtistsCarousel";
 import PricingSection from "../components/PricingSection";
 import TopVibingSongsSection from "../components/TopVibingSongsSection";
@@ -109,6 +110,9 @@ export default function LandingPage() {
 
       {/* Top Vibing Songs Section */}
       <TopVibingSongsSection />
+
+      {/* Label Partners Section */}
+      <LabelPartnersSection />
 
       {/* Features Section */}
       <section className="py-20 px-4 bg-background">

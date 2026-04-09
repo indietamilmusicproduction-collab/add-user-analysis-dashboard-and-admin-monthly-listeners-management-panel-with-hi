@@ -1,10 +1,12 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import GeneralSupportTab from "../components/GeneralSupportTab";
 import SongSubmissionForm from "../components/SongSubmissionForm";
 import TopVibingSongsSection from "../components/TopVibingSongsSection";
 import UserAnalysisPanel from "../components/UserAnalysisPanel";
 import UserArtistProfilesManager from "../components/UserArtistProfilesManager";
 import UserChatPanel from "../components/UserChatPanel";
 import UserPodcastSubmissionSection from "../components/UserPodcastSubmissionSection";
+import UserRevenuePanel from "../components/UserRevenuePanel";
 import UserSubmissionsList from "../components/UserSubmissionsList";
 import UserVideoSubmissionSection from "../components/UserVideoSubmissionSection";
 import VideoSubmissionForm from "../components/VideoSubmissionForm";
@@ -23,7 +25,9 @@ export default function UserDashboard() {
           <TabsTrigger value="video">Video Submissions</TabsTrigger>
           <TabsTrigger value="topVibing">Top Vibing Songs</TabsTrigger>
           <TabsTrigger value="analysis">Analysis</TabsTrigger>
+          <TabsTrigger value="revenue">₹ My Revenue</TabsTrigger>
           <TabsTrigger value="chat">💬 Chat</TabsTrigger>
+          <TabsTrigger value="generalSupport">🎧 General Support</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profiles">
@@ -67,6 +71,10 @@ export default function UserDashboard() {
           <UserAnalysisPanel />
         </TabsContent>
 
+        <TabsContent value="revenue">
+          <UserRevenuePanel />
+        </TabsContent>
+
         <TabsContent value="chat">
           <div className="max-w-2xl mx-auto py-4">
             <div className="mb-4">
@@ -78,6 +86,10 @@ export default function UserDashboard() {
             </div>
             <UserChatPanel />
           </div>
+        </TabsContent>
+
+        <TabsContent value="generalSupport">
+          <GeneralSupportTab />
         </TabsContent>
       </Tabs>
     </div>

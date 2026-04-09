@@ -15,12 +15,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { EpisodeType } from "../backend";
 import {
   useCreatePodcastEpisode,
   useGetMyPodcastShows,
   useIsCurrentUserBlockedPodcastSubmission,
 } from "../hooks/useQueries";
+import { EpisodeType } from "../lib/constants";
 import { fileToExternalBlob } from "../utils/fileToExternalBlob";
 
 interface PodcastEpisodeFormProps {

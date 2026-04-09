@@ -1,0 +1,766 @@
+type http_request_result = 
+ record {
+   body: blob;
+   headers: vec http_header;
+   status: nat;
+ };
+type http_header = 
+ record {
+   name: text;
+   value: text;
+ };
+type _ImmutableObjectStorageRefillResult = 
+ record {
+   success: opt bool;
+   topped_up_amount: opt nat;
+ };
+type _ImmutableObjectStorageRefillInformation = record {
+                                                  proposed_top_up_amount:
+                                                   opt nat;};
+type _ImmutableObjectStorageCreateCertificateResult = 
+ record {
+   blob_hash: text;
+   method: text;
+ };
+type WithdrawStatus = 
+ variant {
+   approved;
+   pending;
+   rejected;
+ };
+type WithdrawRequestInput = 
+ record {
+   amount: float64;
+   fullName: text;
+   googlePayAccountName: text;
+   message: text;
+   qrCodeBlob: ExternalBlob;
+   qrCodeFilename: text;
+   upiId: text;
+ };
+type WithdrawRequest = 
+ record {
+   amount: float64;
+   fullName: text;
+   googlePayAccountName: text;
+   id: text;
+   message: text;
+   qrCodeBlob: ExternalBlob;
+   qrCodeFilename: text;
+   rejectionReason: text;
+   status: WithdrawStatus;
+   submitter: principal;
+   timestamp: Time;
+   upiId: text;
+ };
+type VideoSubmissionStatus = 
+ variant {
+   approved;
+   live;
+   pending;
+   rejected;
+   waiting;
+ };
+type VideoSubmissionInput = 
+ record {
+   artwork: ExternalBlob;
+   category: text;
+   description: text;
+   tags: vec text;
+   thumbnail: ExternalBlob;
+   title: text;
+   videoFile: ExternalBlob;
+ };
+type VideoSubmission = 
+ record {
+   artwork: ExternalBlob;
+   category: text;
+   description: text;
+   id: text;
+   liveUrl: opt text;
+   status: VideoSubmissionStatus;
+   submittedAt: Time;
+   tags: vec text;
+   thumbnail: ExternalBlob;
+   title: text;
+   updatedAt: Time;
+   userId: principal;
+   videoFile: ExternalBlob;
+ };
+type VerificationStatus = 
+ variant {
+   approved;
+   pending;
+   rejected;
+   waiting;
+ };
+type VerificationRequest = 
+ record {
+   expiryExtensionDays: nat;
+   id: text;
+   status: VerificationStatus;
+   timestamp: Time;
+   user: principal;
+   verificationApprovedTimestamp: opt Time;
+ };
+type UserRole = 
+ variant {
+   admin;
+   guest;
+   user;
+ };
+type UserProfile = 
+ record {
+   artistId: text;
+   category: UserCategory;
+   name: text;
+ };
+type UserCategory = 
+ variant {
+   generalArtist;
+   generalLabel;
+   proArtist;
+   proLabel;
+   ultraArtist;
+ };
+type UserApprovalInfo = 
+ record {
+   "principal": principal;
+   status: ApprovalStatus;
+ };
+type TransformationOutput = 
+ record {
+   body: blob;
+   headers: vec http_header;
+   status: nat;
+ };
+type TransformationInput = 
+ record {
+   context: blob;
+   response: http_request_result;
+ };
+type TrackMetadata = 
+ record {
+   artist: text;
+   audioFile: ExternalBlob;
+   audioFilename: text;
+   composer: text;
+   featuredArtist: text;
+   lyricist: text;
+   producer: text;
+   title: text;
+ };
+type TopVibingSong = 
+ record {
+   artistName: text;
+   artworkUrl: text;
+   genre: text;
+   id: nat;
+   rank: nat;
+   streamingLink: text;
+   tagline: opt text;
+   title: text;
+ };
+type Time = int;
+type SubscriptionPlan = 
+ record {
+   benefits: vec text;
+   planName: text;
+   pricePerYear: nat;
+   redirectUrl: text;
+ };
+type StripeSessionStatus = 
+ variant {
+   completed: record {
+                response: text;
+                userPrincipal: opt text;
+              };
+   failed: record {error: text;};
+ };
+type StripeConfiguration = 
+ record {
+   allowedCountries: vec text;
+   secretKey: text;
+ };
+type SongSubmissionInput = 
+ record {
+   additionalDetails: text;
+   albumTracks: opt vec TrackMetadata;
+   appleMusicLink: opt text;
+   artist: text;
+   artworkBlob: ExternalBlob;
+   artworkFilename: text;
+   audioBlob: ExternalBlob;
+   audioFilename: text;
+   callerTuneStartSecond: opt float64;
+   composer: text;
+   contentId: opt bool;
+   contentType: opt text;
+   customCLine: opt text;
+   customPLine: opt text;
+   discountCode: opt text;
+   featuredArtist: text;
+   genre: text;
+   language: text;
+   licenceFile: opt ExternalBlob;
+   licenceFilename: opt text;
+   lyricist: text;
+   musicVideoLink: opt text;
+   premiumLabel: opt text;
+   producer: text;
+   releaseDate: Time;
+   releaseType: text;
+   spotifyLink: opt text;
+   sunoAgreementFile: opt ExternalBlob;
+   sunoAgreementFilename: opt text;
+   sunoTrackLink: opt text;
+   title: text;
+ };
+type SongSubmissionEditInput = 
+ record {
+   additionalDetails: text;
+   albumTracks: opt vec TrackMetadata;
+   appleMusicLink: opt text;
+   artist: text;
+   artworkBlob: ExternalBlob;
+   artworkFilename: text;
+   audioFile: ExternalBlob;
+   audioFilename: text;
+   composer: text;
+   discountCode: opt text;
+   featuredArtist: text;
+   genre: text;
+   language: text;
+   lyricist: text;
+   musicVideoLink: opt text;
+   producer: text;
+   releaseDate: Time;
+   releaseType: text;
+   songSubmissionId: text;
+   spotifyLink: opt text;
+   title: text;
+ };
+type SongSubmissionAdmin = 
+ record {
+   acrResult: opt ACRResult;
+   additionalDetails: text;
+   adminComment: text;
+   adminLiveLink: opt text;
+   adminRemarks: text;
+   albumTracks: opt vec TrackMetadata;
+   appleMusicLink: opt text;
+   artist: text;
+   artwork: ExternalBlob;
+   artworkFilename: text;
+   audioFile: ExternalBlob;
+   audioFilename: text;
+   callerTuneStartSecond: opt float64;
+   composer: text;
+   contentId: opt bool;
+   contentType: opt text;
+   customCLine: opt text;
+   customPLine: opt text;
+   discountCode: opt text;
+   featuredArtist: text;
+   genre: text;
+   id: text;
+   isManuallyRejected: bool;
+   language: text;
+   licenceFile: opt ExternalBlob;
+   licenceFilename: opt text;
+   liveStreamLink: opt text;
+   lyricist: text;
+   monthlyListeners: opt float64;
+   musicVideoLink: opt text;
+   preSaveLink: opt text;
+   premiumLabel: opt text;
+   producer: text;
+   publicLink: opt text;
+   releaseDate: Time;
+   releaseType: text;
+   revenue: opt float64;
+   spotifyLink: opt text;
+   status: SongStatus;
+   submitter: principal;
+   sunoAgreementFile: opt ExternalBlob;
+   sunoAgreementFilename: opt text;
+   sunoTrackLink: opt text;
+   timestamp: Time;
+   title: text;
+ };
+type SongSubmission = 
+ record {
+   acrResult: opt ACRResult;
+   additionalDetails: text;
+   adminComment: text;
+   adminLiveLink: opt text;
+   adminRemarks: text;
+   albumTracks: opt vec TrackMetadata;
+   appleMusicLink: opt text;
+   artist: text;
+   artwork: ExternalBlob;
+   artworkFilename: text;
+   audioFile: ExternalBlob;
+   audioFilename: text;
+   callerTuneStartSecond: opt float64;
+   composer: text;
+   contentId: opt bool;
+   contentType: opt text;
+   customCLine: opt text;
+   customPLine: opt text;
+   discountCode: opt text;
+   featuredArtist: text;
+   genre: text;
+   id: text;
+   isManuallyRejected: bool;
+   language: text;
+   licenceFile: opt ExternalBlob;
+   licenceFilename: opt text;
+   liveStreamLink: opt text;
+   lyricist: text;
+   musicVideoLink: opt text;
+   preSaveLink: opt text;
+   premiumLabel: opt text;
+   producer: text;
+   publicLink: opt text;
+   releaseDate: Time;
+   releaseType: text;
+   spotifyLink: opt text;
+   status: SongStatus;
+   submitter: principal;
+   sunoAgreementFile: opt ExternalBlob;
+   sunoAgreementFilename: opt text;
+   sunoTrackLink: opt text;
+   timestamp: Time;
+   title: text;
+ };
+type SongStatus = 
+ variant {
+   approved;
+   draft;
+   live;
+   pending;
+   rejected;
+ };
+type ShoppingItem = 
+ record {
+   currency: text;
+   priceInCents: nat;
+   productDescription: text;
+   productName: text;
+   quantity: nat;
+ };
+type SaveArtistProfileInput = 
+ record {
+   appleProfile: text;
+   email: text;
+   facebookLink: text;
+   fullName: text;
+   instagramLink: text;
+   isApproved: bool;
+   mobileNumber: text;
+   profilePhoto: ExternalBlob;
+   profilePhotoFilename: text;
+   spotifyProfile: text;
+   stageName: text;
+   youtubeChannelLink: text;
+ };
+type RSVP = 
+ record {
+   attending: bool;
+   inviteCode: text;
+   name: text;
+   timestamp: Time;
+ };
+type PublicSongInfo = 
+ record {
+   appleMusicLink: opt text;
+   artist: text;
+   artwork: ExternalBlob;
+   featuredArtist: text;
+   genre: text;
+   id: text;
+   language: text;
+   musicVideoLink: opt text;
+   releaseDate: Time;
+   spotifyLink: opt text;
+   title: text;
+ };
+type PodcastType = 
+ variant {
+   audio;
+   video;
+ };
+type PodcastShowInput = 
+ record {
+   artwork: ExternalBlob;
+   category: PodcastCategory;
+   description: text;
+   language: Language;
+   podcastType: PodcastType;
+   title: text;
+ };
+type PodcastShow = 
+ record {
+   artwork: ExternalBlob;
+   category: PodcastCategory;
+   createdBy: principal;
+   description: text;
+   id: text;
+   language: Language;
+   liveLink: opt text;
+   moderationStatus: PodcastModerationStatus;
+   podcastType: PodcastType;
+   timestamp: Time;
+   title: text;
+ };
+type PodcastModerationStatus = 
+ variant {
+   approved;
+   live;
+   pending;
+   rejected;
+ };
+type PodcastEpisodeInput = 
+ record {
+   artwork: ExternalBlob;
+   description: text;
+   episodeNumber: nat;
+   episodeType: EpisodeType;
+   isEighteenPlus: bool;
+   isExplicit: bool;
+   isPromotional: bool;
+   mediaFile: ExternalBlob;
+   seasonNumber: nat;
+   showId: text;
+   thumbnail: ExternalBlob;
+   title: text;
+ };
+type PodcastEpisode = 
+ record {
+   artwork: ExternalBlob;
+   createdBy: principal;
+   description: text;
+   episodeNumber: nat;
+   episodeType: EpisodeType;
+   id: text;
+   isEighteenPlus: bool;
+   isExplicit: bool;
+   isPromotional: bool;
+   mediaFile: ExternalBlob;
+   moderationStatus: PodcastModerationStatus;
+   seasonNumber: nat;
+   showId: text;
+   thumbnail: ExternalBlob;
+   timestamp: Time;
+   title: text;
+ };
+type PodcastCategory = 
+ variant {
+   arts;
+   business;
+   comedy;
+   education;
+   healthFitness;
+   kidsFamily;
+   music;
+   newsPolitics;
+   other;
+   religionSpirituality;
+   science;
+   sports;
+   technology;
+   tvFilm;
+ };
+type MonthlyListenerStats = 
+ record {
+   month: nat;
+   value: nat;
+   year: nat;
+ };
+type Language = 
+ variant {
+   bengali;
+   english;
+   gujarati;
+   hindi;
+   kannada;
+   malayalam;
+   marathi;
+   other;
+   punjabi;
+   tamil;
+   telugu;
+ };
+type LabelReleaseInput = 
+ record {
+   artistName: text;
+   artworkUrl: text;
+   labelId: nat;
+   songTitle: text;
+   streamingLink: text;
+ };
+type LabelRelease = 
+ record {
+   artistName: text;
+   artworkUrl: text;
+   id: nat;
+   labelId: nat;
+   songTitle: text;
+   streamingLink: text;
+ };
+type LabelPartnerInput = 
+ record {
+   description: text;
+   labelName: text;
+   logoUrl: text;
+   websiteLink: opt text;
+ };
+type LabelPartner = 
+ record {
+   description: text;
+   id: nat;
+   labelName: text;
+   logoUrl: text;
+   websiteLink: opt text;
+ };
+type InviteCode = 
+ record {
+   code: text;
+   created: Time;
+   used: bool;
+ };
+type FeaturedArtistSong = 
+ record {
+   link: text;
+   title: text;
+ };
+type FeaturedArtistInput = 
+ record {
+   aboutBlurb: text;
+   artistName: text;
+   isActive: bool;
+   photoUrl: text;
+   songs: vec FeaturedArtistSong;
+ };
+type FeaturedArtist = 
+ record {
+   aboutBlurb: text;
+   artistName: text;
+   id: nat;
+   isActive: bool;
+   photoUrl: text;
+   slotIndex: nat;
+   songs: vec FeaturedArtistSong;
+ };
+type ExternalBlob = blob;
+type EpisodeType = 
+ variant {
+   bonus;
+   full;
+   trailer;
+ };
+type ArtistProfile = 
+ record {
+   appleProfile: text;
+   email: text;
+   facebookLink: text;
+   fullName: text;
+   id: text;
+   instagramLink: text;
+   isApproved: bool;
+   isVerified: bool;
+   mobileNumber: text;
+   owner: principal;
+   profilePhoto: ExternalBlob;
+   profilePhotoFilename: text;
+   spotifyProfile: text;
+   stageName: text;
+   youtubeChannelLink: text;
+ };
+type ApprovalStatus = 
+ variant {
+   approved;
+   pending;
+   rejected;
+ };
+type AdminUserView = 
+ record {
+   displayName: text;
+   isAdmin: bool;
+   isPodcastBlocked: bool;
+   isSongBlocked: bool;
+   isTeamMember: bool;
+   isVerified: bool;
+   "principal": principal;
+ };
+type ACRResult = 
+ record {
+   music: text;
+   statusCode: text;
+ };
+service : {
+  _immutableObjectStorageBlobsAreLive: (hashes: vec blob) -> (vec bool) query;
+  _immutableObjectStorageBlobsToDelete: () -> (vec blob) query;
+  _immutableObjectStorageConfirmBlobDeletion: (blobs: vec blob) -> ();
+  _immutableObjectStorageCreateCertificate: (blobHash: text) ->
+   (_ImmutableObjectStorageCreateCertificateResult);
+  _immutableObjectStorageRefillCashier: (refillInformation:
+   opt _ImmutableObjectStorageRefillInformation) ->
+   (_ImmutableObjectStorageRefillResult);
+  _immutableObjectStorageUpdateGatewayPrincipals: () -> ();
+  _initializeAccessControl: () -> ();
+  addLabelPartner: (input: LabelPartnerInput) -> (nat);
+  addLabelRelease: (input: LabelReleaseInput) -> (nat);
+  addTopVibingSong: (song: TopVibingSong) -> (nat);
+  adminDeleteArtistProfile: (id: text) -> ();
+  adminDeleteSubmission: (id: text) -> ();
+  adminEditArtistProfile: (id: text, input: SaveArtistProfileInput) -> ();
+  adminEditSubmission: (input: SongSubmissionEditInput) -> ();
+  adminSetSubmissionLive: (id: text, liveUrl: text, adminRemarks: text,
+   adminComment: text) -> ();
+  adminUpdateSongStats: (songId: text, monthlyListeners: opt float64,
+   revenue: opt float64) -> ();
+  adminUpdateSubmission: (id: text, newStatus: SongStatus, adminRemarks:
+   text, adminComment: text) -> ();
+  applyForVerification: () -> (text);
+  approveEpisode: (id: text) -> ();
+  approvePodcast: (id: text) -> ();
+  approveWithdrawRequest: (requestId: text) -> ();
+  assignCallerUserRole: (user: principal, role: UserRole) -> ();
+  blockUserPodcastSubmission: (user: principal) -> ();
+  blockUserSongSubmission: (user: principal) -> ();
+  bootstrapAdmin: () -> ();
+  createArtistProfile: (input: SaveArtistProfileInput) -> (text);
+  createCheckoutSession: (items: vec ShoppingItem, successUrl: text,
+   cancelUrl: text) -> (text);
+  createPodcastEpisode: (input: PodcastEpisodeInput) -> (text);
+  createPodcastShow: (input: PodcastShowInput) -> (text);
+  createSubscriptionPlan: (plan: SubscriptionPlan) -> ();
+  deleteArtistProfile: (id: text) -> ();
+  deleteLabelPartner: (id: nat) -> ();
+  deleteLabelRelease: (id: nat) -> ();
+  deleteSubscriptionPlan: (planName: text) -> ();
+  deleteTopVibingSong: (id: nat) -> ();
+  deleteVideoSubmission: (id: text) -> ();
+  demoteFromAdmin: (user: principal) -> ();
+  doesUserHaveArtistProfile: (owner: principal) -> (bool) query;
+  downgradeTeamMember: (user: principal) -> ();
+  downloadVideoFile: (id: text) -> (opt ExternalBlob) query;
+  editSongSubmission: (input: SongSubmissionEditInput) -> ();
+  generateInviteCode: () -> (text);
+  getActiveFeaturedArtists: () -> (vec FeaturedArtist) query;
+  getAllArtistProfileOwnersForAdmin: () -> (vec principal) query;
+  getAllArtistProfilesForAdmin: () -> (vec ArtistProfile) query;
+  getAllBlockedUsersAdmin: () -> (vec principal) query;
+  getAllEpisodes: () -> (vec PodcastEpisode) query;
+  getAllLabelPartners: () -> (vec LabelPartner) query;
+  getAllLabelReleases: () -> (vec LabelRelease) query;
+  getAllPendingEpisodes: () -> (vec PodcastEpisode) query;
+  getAllPendingPodcasts: () -> (vec PodcastShow) query;
+  getAllPodcasts: () -> (vec PodcastShow) query;
+  getAllPremiumUsers: () -> (vec principal) query;
+  getAllRSVPs: () -> (vec RSVP) query;
+  getAllRegisteredUsersForAdmin: () -> (vec AdminUserView) query;
+  getAllSongRevenues: () -> (vec record {
+                                   text;
+                                   float64;
+                                 }) query;
+  getAllSubmissionsForAdmin: () -> (vec SongSubmission) query;
+  getAllSubmissionsWithStatsForAdmin: () -> (vec SongSubmissionAdmin) query;
+  getAllSubscriptionPlans: () -> (vec SubscriptionPlan) query;
+  getAllTeamMembers: () -> (vec principal) query;
+  getAllTopVibingSongs: () -> (vec TopVibingSong) query;
+  getAllVideoSubmissions: () -> (vec VideoSubmission) query;
+  getAllWithdrawRequestsForAdmin: () -> (vec WithdrawRequest) query;
+  getAnnouncement: () -> (text) query;
+  getArtistProfileByOwner: (owner: principal) -> (opt ArtistProfile) query;
+  getArtistProfileEditingAccessStatus: () -> (bool) query;
+  getArtistProfileIdByOwnerId: (owner: principal) -> (opt text) query;
+  getArtistProfilesByUserForAdmin: (user: principal) ->
+   (vec ArtistProfile) query;
+  getCallerUserProfile: () -> (opt UserProfile) query;
+  getCallerUserRole: () -> (UserRole) query;
+  getEpisodesByShowId: (showId: text) -> (vec PodcastEpisode) query;
+  getFeaturedArtists: () -> (vec FeaturedArtist) query;
+  getInviteCodes: () -> (vec InviteCode) query;
+  getLabelReleases: (labelId: nat) -> (vec LabelRelease) query;
+  getLiveSongsForAdmin: () -> (vec SongSubmission) query;
+  getMyArtistProfiles: () -> (vec ArtistProfile) query;
+  getMyEpisodes: (showId: text) -> (vec PodcastEpisode) query;
+  getMyPodcastShows: () -> (vec PodcastShow) query;
+  getMySubmissions: () -> (vec SongSubmission) query;
+  getMyWithdrawRequests: () -> (vec WithdrawRequest) query;
+  getPodcastsByCategory: (category: PodcastCategory) ->
+   (vec PodcastShow) query;
+  getRankedTopVibingSongs: () -> (vec TopVibingSong) query;
+  getSongInfo: (songId: text) -> (opt PublicSongInfo) query;
+  getSongMonthlyListenerStats: (songId: text) ->
+   (vec MonthlyListenerStats) query;
+  getSongMonthlyListeners: (songId: text) -> (float64) query;
+  getSongRevenue: (songId: text) -> (float64) query;
+  getStripeSessionStatus: (sessionId: text) -> (StripeSessionStatus);
+  getTopVibingSong: (id: nat) -> (opt TopVibingSong) query;
+  getUserProfile: (user: principal) -> (opt UserProfile) query;
+  getUserVideoSubmissions: () -> (vec VideoSubmission) query;
+  getUsersByCategory: (category: UserCategory) -> (vec principal) query;
+  getVerificationRequests: () -> (vec VerificationRequest) query;
+  getVerificationRequestsByUser: (user: principal) ->
+   (vec VerificationRequest) query;
+  getWebsiteLogo: () -> (opt ExternalBlob) query;
+  getWithdrawnAmountForUser: () -> (float64) query;
+  grantPremiumRole: (user: principal) -> ();
+  handleVerificationRequest: (id: text, isApproved: bool, remarks: text,
+   newStatus: VerificationStatus) -> ();
+  isArtistProfileEditingEnabled: () -> (bool) query;
+  isArtistVerified: (user: principal) -> (bool) query;
+  isCallerAdmin: () -> (bool) query;
+  isCallerApproved: () -> (bool) query;
+  isCallerPremium: () -> (bool) query;
+  isStripeConfigured: () -> (bool) query;
+  isUserBlockedPodcastSubmission: (user: principal) -> (bool) query;
+  isUserBlockedSongSubmission: (user: principal) -> (bool) query;
+  isUserTeamMember: (user: principal) -> (bool) query;
+  listAdmins: () -> (vec principal) query;
+  listApprovals: () -> (vec UserApprovalInfo) query;
+  markEpisodeLive: (id: text) -> ();
+  markPodcastLive: (id: text, liveLink: text) -> ();
+  promoteToAdmin: (user: principal) -> ();
+  rejectEpisode: (id: text) -> ();
+  rejectPodcast: (id: text) -> ();
+  rejectWithdrawRequest: (requestId: text, reason: text) -> ();
+  removeWebsiteLogo: () -> ();
+  reorderTopVibingSongs: (ids: vec nat) -> ();
+  requestApproval: () -> ();
+  revokePremiumRole: (user: principal) -> ();
+  saveCallerUserProfile: (profile: UserProfile) -> ();
+  setAnnouncement: ("text": text) -> ();
+  setApproval: (user: principal, status: ApprovalStatus) -> ();
+  setArtistProfileEditingAccess: (enabled: bool) -> ();
+  setFeaturedArtist: (slotIndex: nat, input: FeaturedArtistInput) -> ();
+  setSongRevenue: (songId: text, amount: float64) -> ();
+  setStripeConfiguration: (config: StripeConfiguration) -> ();
+  setWebsiteLogo: (logo: ExternalBlob) -> ();
+  submitRSVP: (name: text, attending: bool, inviteCode: text) -> ();
+  submitSong: (input: SongSubmissionInput) -> (text);
+  submitVideo: (input: VideoSubmissionInput) -> (text);
+  submitWithdrawRequest: (input: WithdrawRequestInput) -> (text);
+  toggleFeaturedArtistSlot: (slotIndex: nat, isActive: bool) -> ();
+  transform: (input: TransformationInput) -> (TransformationOutput) query;
+  unblockUserPodcastSubmission: (user: principal) -> ();
+  unblockUserSongSubmission: (user: principal) -> ();
+  updateArtistProfile: (id: text, input: SaveArtistProfileInput) -> ();
+  updateLabelPartner: (partner: LabelPartner) -> ();
+  updateLabelRelease: (release: LabelRelease) -> ();
+  updateMonthlyListenerStats: (songId: text, stats:
+   vec MonthlyListenerStats) -> ();
+  updateSubscriptionPlan: (plan: SubscriptionPlan) -> ();
+  updateTopVibingSong: (song: TopVibingSong) -> ();
+  updateUserCategory: (user: principal, category: UserCategory) -> ();
+  updateVerificationStatus: (id: text, newStatus: VerificationStatus,
+   extensionDays: nat) -> ();
+  updateVideoStatus: (id: text, status: VideoSubmissionStatus, liveUrl:
+   opt text) -> ();
+  updateVideoSubmission: (id: text, input: VideoSubmissionInput) -> ();
+  upgradeUserToTeamMember: (user: principal) -> ();
+}

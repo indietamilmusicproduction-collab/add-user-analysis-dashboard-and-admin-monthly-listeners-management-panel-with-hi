@@ -138,7 +138,7 @@ export default function ArtistSetupForm({
 
   const isUploading = uploadProgress > 0 && uploadProgress < 100;
 
-  if (editingStatusLoading) {
+  if (editingStatusLoading && isEditing) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center space-y-2">

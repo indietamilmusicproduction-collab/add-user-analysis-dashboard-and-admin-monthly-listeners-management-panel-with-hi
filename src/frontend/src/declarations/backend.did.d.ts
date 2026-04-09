@@ -11,6 +11,15 @@ import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
 export interface ACRResult { 'music' : string, 'statusCode' : string }
+export interface AdminUserView {
+  'isSongBlocked' : boolean,
+  'principal' : Principal,
+  'displayName' : string,
+  'isVerified' : boolean,
+  'isAdmin' : boolean,
+  'isTeamMember' : boolean,
+  'isPodcastBlocked' : boolean,
+}
 export type ApprovalStatus = { 'pending' : null } |
   { 'approved' : null } |
   { 'rejected' : null };
@@ -57,6 +66,34 @@ export interface InviteCode {
   'code' : string,
   'used' : boolean,
 }
+export interface LabelPartner {
+  'id' : bigint,
+  'websiteLink' : [] | [string],
+  'labelName' : string,
+  'description' : string,
+  'logoUrl' : string,
+}
+export interface LabelPartnerInput {
+  'websiteLink' : [] | [string],
+  'labelName' : string,
+  'description' : string,
+  'logoUrl' : string,
+}
+export interface LabelRelease {
+  'id' : bigint,
+  'labelId' : bigint,
+  'streamingLink' : string,
+  'songTitle' : string,
+  'artworkUrl' : string,
+  'artistName' : string,
+}
+export interface LabelReleaseInput {
+  'labelId' : bigint,
+  'streamingLink' : string,
+  'songTitle' : string,
+  'artworkUrl' : string,
+  'artistName' : string,
+}
 export type Language = { 'tamil' : null } |
   { 'hindi' : null } |
   { 'other' : null } |
@@ -68,6 +105,11 @@ export type Language = { 'tamil' : null } |
   { 'telugu' : null } |
   { 'bengali' : null } |
   { 'english' : null };
+export interface MonthlyListenerStats {
+  'month' : bigint,
+  'value' : bigint,
+  'year' : bigint,
+}
 export type PodcastCategory = { 'kidsFamily' : null } |
   { 'music' : null } |
   { 'newsPolitics' : null } |
@@ -192,13 +234,17 @@ export interface SongSubmission {
   'albumTracks' : [] | [Array<TrackMetadata>],
   'adminLiveLink' : [] | [string],
   'title' : string,
+  'contentId' : [] | [boolean],
   'preSaveLink' : [] | [string],
   'additionalDetails' : string,
   'lyricist' : string,
   'spotifyLink' : [] | [string],
   'publicLink' : [] | [string],
   'submitter' : Principal,
+  'licenceFile' : [] | [ExternalBlob],
+  'contentType' : [] | [string],
   'discountCode' : [] | [string],
+  'customPLine' : [] | [string],
   'artworkFilename' : string,
   'audioFile' : ExternalBlob,
   'liveStreamLink' : [] | [string],
@@ -209,16 +255,70 @@ export interface SongSubmission {
   'adminComment' : string,
   'genre' : string,
   'musicVideoLink' : [] | [string],
+  'sunoAgreementFile' : [] | [ExternalBlob],
   'timestamp' : Time,
+  'sunoAgreementFilename' : [] | [string],
   'artist' : string,
   'appleMusicLink' : [] | [string],
+  'callerTuneStartSecond' : [] | [number],
+  'customCLine' : [] | [string],
   'acrResult' : [] | [ACRResult],
   'producer' : string,
   'releaseDate' : Time,
   'isManuallyRejected' : boolean,
+  'premiumLabel' : [] | [string],
+  'licenceFilename' : [] | [string],
   'releaseType' : string,
   'adminRemarks' : string,
   'featuredArtist' : string,
+  'sunoTrackLink' : [] | [string],
+}
+export interface SongSubmissionAdmin {
+  'id' : string,
+  'status' : SongStatus,
+  'albumTracks' : [] | [Array<TrackMetadata>],
+  'adminLiveLink' : [] | [string],
+  'title' : string,
+  'contentId' : [] | [boolean],
+  'preSaveLink' : [] | [string],
+  'additionalDetails' : string,
+  'lyricist' : string,
+  'spotifyLink' : [] | [string],
+  'revenue' : [] | [number],
+  'publicLink' : [] | [string],
+  'submitter' : Principal,
+  'licenceFile' : [] | [ExternalBlob],
+  'contentType' : [] | [string],
+  'monthlyListeners' : [] | [number],
+  'discountCode' : [] | [string],
+  'customPLine' : [] | [string],
+  'artworkFilename' : string,
+  'audioFile' : ExternalBlob,
+  'liveStreamLink' : [] | [string],
+  'artwork' : ExternalBlob,
+  'audioFilename' : string,
+  'language' : string,
+  'composer' : string,
+  'adminComment' : string,
+  'genre' : string,
+  'musicVideoLink' : [] | [string],
+  'sunoAgreementFile' : [] | [ExternalBlob],
+  'timestamp' : Time,
+  'sunoAgreementFilename' : [] | [string],
+  'artist' : string,
+  'appleMusicLink' : [] | [string],
+  'callerTuneStartSecond' : [] | [number],
+  'customCLine' : [] | [string],
+  'acrResult' : [] | [ACRResult],
+  'producer' : string,
+  'releaseDate' : Time,
+  'isManuallyRejected' : boolean,
+  'premiumLabel' : [] | [string],
+  'licenceFilename' : [] | [string],
+  'releaseType' : string,
+  'adminRemarks' : string,
+  'featuredArtist' : string,
+  'sunoTrackLink' : [] | [string],
 }
 export interface SongSubmissionEditInput {
   'artworkBlob' : ExternalBlob,
@@ -247,10 +347,14 @@ export interface SongSubmissionInput {
   'artworkBlob' : ExternalBlob,
   'albumTracks' : [] | [Array<TrackMetadata>],
   'title' : string,
+  'contentId' : [] | [boolean],
   'additionalDetails' : string,
   'lyricist' : string,
   'spotifyLink' : [] | [string],
+  'licenceFile' : [] | [ExternalBlob],
+  'contentType' : [] | [string],
   'discountCode' : [] | [string],
+  'customPLine' : [] | [string],
   'artworkFilename' : string,
   'audioBlob' : ExternalBlob,
   'audioFilename' : string,
@@ -258,12 +362,19 @@ export interface SongSubmissionInput {
   'composer' : string,
   'genre' : string,
   'musicVideoLink' : [] | [string],
+  'sunoAgreementFile' : [] | [ExternalBlob],
+  'sunoAgreementFilename' : [] | [string],
   'artist' : string,
   'appleMusicLink' : [] | [string],
+  'callerTuneStartSecond' : [] | [number],
+  'customCLine' : [] | [string],
   'producer' : string,
   'releaseDate' : Time,
+  'premiumLabel' : [] | [string],
+  'licenceFilename' : [] | [string],
   'releaseType' : string,
   'featuredArtist' : string,
+  'sunoTrackLink' : [] | [string],
 }
 export interface StripeConfiguration {
   'allowedCountries' : Array<string>,
@@ -367,14 +478,40 @@ export type VideoSubmissionStatus = { 'pending' : null } |
   { 'approved' : null } |
   { 'rejected' : null } |
   { 'waiting' : null };
-export interface _CaffeineStorageCreateCertificateResult {
+export interface WithdrawRequest {
+  'id' : string,
+  'status' : WithdrawStatus,
+  'qrCodeBlob' : ExternalBlob,
+  'submitter' : Principal,
+  'rejectionReason' : string,
+  'fullName' : string,
+  'message' : string,
+  'googlePayAccountName' : string,
+  'timestamp' : Time,
+  'upiId' : string,
+  'qrCodeFilename' : string,
+  'amount' : number,
+}
+export interface WithdrawRequestInput {
+  'qrCodeBlob' : ExternalBlob,
+  'fullName' : string,
+  'message' : string,
+  'googlePayAccountName' : string,
+  'upiId' : string,
+  'qrCodeFilename' : string,
+  'amount' : number,
+}
+export type WithdrawStatus = { 'pending' : null } |
+  { 'approved' : null } |
+  { 'rejected' : null };
+export interface _ImmutableObjectStorageCreateCertificateResult {
   'method' : string,
   'blob_hash' : string,
 }
-export interface _CaffeineStorageRefillInformation {
+export interface _ImmutableObjectStorageRefillInformation {
   'proposed_top_up_amount' : [] | [bigint],
 }
-export interface _CaffeineStorageRefillResult {
+export interface _ImmutableObjectStorageRefillResult {
   'success' : [] | [boolean],
   'topped_up_amount' : [] | [bigint],
 }
@@ -385,22 +522,27 @@ export interface http_request_result {
   'headers' : Array<http_header>,
 }
 export interface _SERVICE {
-  '_caffeineStorageBlobIsLive' : ActorMethod<[Uint8Array], boolean>,
-  '_caffeineStorageBlobsToDelete' : ActorMethod<[], Array<Uint8Array>>,
-  '_caffeineStorageConfirmBlobDeletion' : ActorMethod<
+  '_immutableObjectStorageBlobsAreLive' : ActorMethod<
+    [Array<Uint8Array>],
+    Array<boolean>
+  >,
+  '_immutableObjectStorageBlobsToDelete' : ActorMethod<[], Array<Uint8Array>>,
+  '_immutableObjectStorageConfirmBlobDeletion' : ActorMethod<
     [Array<Uint8Array>],
     undefined
   >,
-  '_caffeineStorageCreateCertificate' : ActorMethod<
+  '_immutableObjectStorageCreateCertificate' : ActorMethod<
     [string],
-    _CaffeineStorageCreateCertificateResult
+    _ImmutableObjectStorageCreateCertificateResult
   >,
-  '_caffeineStorageRefillCashier' : ActorMethod<
-    [[] | [_CaffeineStorageRefillInformation]],
-    _CaffeineStorageRefillResult
+  '_immutableObjectStorageRefillCashier' : ActorMethod<
+    [[] | [_ImmutableObjectStorageRefillInformation]],
+    _ImmutableObjectStorageRefillResult
   >,
-  '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
-  '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  '_immutableObjectStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
+  '_initializeAccessControl' : ActorMethod<[], undefined>,
+  'addLabelPartner' : ActorMethod<[LabelPartnerInput], bigint>,
+  'addLabelRelease' : ActorMethod<[LabelReleaseInput], bigint>,
   'addTopVibingSong' : ActorMethod<[TopVibingSong], bigint>,
   'adminDeleteArtistProfile' : ActorMethod<[string], undefined>,
   'adminDeleteSubmission' : ActorMethod<[string], undefined>,
@@ -413,6 +555,10 @@ export interface _SERVICE {
     [string, string, string, string],
     undefined
   >,
+  'adminUpdateSongStats' : ActorMethod<
+    [string, [] | [number], [] | [number]],
+    undefined
+  >,
   'adminUpdateSubmission' : ActorMethod<
     [string, SongStatus, string, string],
     undefined
@@ -420,9 +566,11 @@ export interface _SERVICE {
   'applyForVerification' : ActorMethod<[], string>,
   'approveEpisode' : ActorMethod<[string], undefined>,
   'approvePodcast' : ActorMethod<[string], undefined>,
+  'approveWithdrawRequest' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'blockUserPodcastSubmission' : ActorMethod<[Principal], undefined>,
   'blockUserSongSubmission' : ActorMethod<[Principal], undefined>,
+  'bootstrapAdmin' : ActorMethod<[], undefined>,
   'createArtistProfile' : ActorMethod<[SaveArtistProfileInput], string>,
   'createCheckoutSession' : ActorMethod<
     [Array<ShoppingItem>, string, string],
@@ -432,13 +580,15 @@ export interface _SERVICE {
   'createPodcastShow' : ActorMethod<[PodcastShowInput], string>,
   'createSubscriptionPlan' : ActorMethod<[SubscriptionPlan], undefined>,
   'deleteArtistProfile' : ActorMethod<[string], undefined>,
+  'deleteLabelPartner' : ActorMethod<[bigint], undefined>,
+  'deleteLabelRelease' : ActorMethod<[bigint], undefined>,
   'deleteSubscriptionPlan' : ActorMethod<[string], undefined>,
   'deleteTopVibingSong' : ActorMethod<[bigint], undefined>,
   'deleteVideoSubmission' : ActorMethod<[string], undefined>,
   'demoteFromAdmin' : ActorMethod<[Principal], undefined>,
   'doesUserHaveArtistProfile' : ActorMethod<[Principal], boolean>,
   'downgradeTeamMember' : ActorMethod<[Principal], undefined>,
-  'downloadVideoFile' : ActorMethod<[string], ExternalBlob>,
+  'downloadVideoFile' : ActorMethod<[string], [] | [ExternalBlob]>,
   'editSongSubmission' : ActorMethod<[SongSubmissionEditInput], undefined>,
   'generateInviteCode' : ActorMethod<[], string>,
   'getActiveFeaturedArtists' : ActorMethod<[], Array<FeaturedArtist>>,
@@ -446,15 +596,26 @@ export interface _SERVICE {
   'getAllArtistProfilesForAdmin' : ActorMethod<[], Array<ArtistProfile>>,
   'getAllBlockedUsersAdmin' : ActorMethod<[], Array<Principal>>,
   'getAllEpisodes' : ActorMethod<[], Array<PodcastEpisode>>,
+  'getAllLabelPartners' : ActorMethod<[], Array<LabelPartner>>,
+  'getAllLabelReleases' : ActorMethod<[], Array<LabelRelease>>,
   'getAllPendingEpisodes' : ActorMethod<[], Array<PodcastEpisode>>,
   'getAllPendingPodcasts' : ActorMethod<[], Array<PodcastShow>>,
   'getAllPodcasts' : ActorMethod<[], Array<PodcastShow>>,
+  'getAllPremiumUsers' : ActorMethod<[], Array<Principal>>,
   'getAllRSVPs' : ActorMethod<[], Array<RSVP>>,
+  'getAllRegisteredUsersForAdmin' : ActorMethod<[], Array<AdminUserView>>,
+  'getAllSongRevenues' : ActorMethod<[], Array<[string, number]>>,
   'getAllSubmissionsForAdmin' : ActorMethod<[], Array<SongSubmission>>,
+  'getAllSubmissionsWithStatsForAdmin' : ActorMethod<
+    [],
+    Array<SongSubmissionAdmin>
+  >,
   'getAllSubscriptionPlans' : ActorMethod<[], Array<SubscriptionPlan>>,
   'getAllTeamMembers' : ActorMethod<[], Array<Principal>>,
   'getAllTopVibingSongs' : ActorMethod<[], Array<TopVibingSong>>,
   'getAllVideoSubmissions' : ActorMethod<[], Array<VideoSubmission>>,
+  'getAllWithdrawRequestsForAdmin' : ActorMethod<[], Array<WithdrawRequest>>,
+  'getAnnouncement' : ActorMethod<[], string>,
   'getArtistProfileByOwner' : ActorMethod<[Principal], [] | [ArtistProfile]>,
   'getArtistProfileEditingAccessStatus' : ActorMethod<[], boolean>,
   'getArtistProfileIdByOwnerId' : ActorMethod<[Principal], [] | [string]>,
@@ -467,24 +628,35 @@ export interface _SERVICE {
   'getEpisodesByShowId' : ActorMethod<[string], Array<PodcastEpisode>>,
   'getFeaturedArtists' : ActorMethod<[], Array<FeaturedArtist>>,
   'getInviteCodes' : ActorMethod<[], Array<InviteCode>>,
+  'getLabelReleases' : ActorMethod<[bigint], Array<LabelRelease>>,
+  'getLiveSongsForAdmin' : ActorMethod<[], Array<SongSubmission>>,
   'getMyArtistProfiles' : ActorMethod<[], Array<ArtistProfile>>,
   'getMyEpisodes' : ActorMethod<[string], Array<PodcastEpisode>>,
   'getMyPodcastShows' : ActorMethod<[], Array<PodcastShow>>,
   'getMySubmissions' : ActorMethod<[], Array<SongSubmission>>,
+  'getMyWithdrawRequests' : ActorMethod<[], Array<WithdrawRequest>>,
   'getPodcastsByCategory' : ActorMethod<[PodcastCategory], Array<PodcastShow>>,
   'getRankedTopVibingSongs' : ActorMethod<[], Array<TopVibingSong>>,
-  'getSongInfo' : ActorMethod<[string], PublicSongInfo>,
+  'getSongInfo' : ActorMethod<[string], [] | [PublicSongInfo]>,
+  'getSongMonthlyListenerStats' : ActorMethod<
+    [string],
+    Array<MonthlyListenerStats>
+  >,
+  'getSongMonthlyListeners' : ActorMethod<[string], number>,
+  'getSongRevenue' : ActorMethod<[string], number>,
   'getStripeSessionStatus' : ActorMethod<[string], StripeSessionStatus>,
-  'getTopVibingSong' : ActorMethod<[bigint], TopVibingSong>,
+  'getTopVibingSong' : ActorMethod<[bigint], [] | [TopVibingSong]>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'getUserVideoSubmissions' : ActorMethod<[], Array<VideoSubmission>>,
-  'getUsersByCategory' : ActorMethod<[UserCategory], Array<UserProfile>>,
+  'getUsersByCategory' : ActorMethod<[UserCategory], Array<Principal>>,
   'getVerificationRequests' : ActorMethod<[], Array<VerificationRequest>>,
   'getVerificationRequestsByUser' : ActorMethod<
     [Principal],
     Array<VerificationRequest>
   >,
   'getWebsiteLogo' : ActorMethod<[], [] | [ExternalBlob]>,
+  'getWithdrawnAmountForUser' : ActorMethod<[], number>,
+  'grantPremiumRole' : ActorMethod<[Principal], undefined>,
   'handleVerificationRequest' : ActorMethod<
     [string, boolean, string, VerificationStatus],
     undefined
@@ -493,6 +665,7 @@ export interface _SERVICE {
   'isArtistVerified' : ActorMethod<[Principal], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'isCallerApproved' : ActorMethod<[], boolean>,
+  'isCallerPremium' : ActorMethod<[], boolean>,
   'isStripeConfigured' : ActorMethod<[], boolean>,
   'isUserBlockedPodcastSubmission' : ActorMethod<[Principal], boolean>,
   'isUserBlockedSongSubmission' : ActorMethod<[Principal], boolean>,
@@ -504,24 +677,35 @@ export interface _SERVICE {
   'promoteToAdmin' : ActorMethod<[Principal], undefined>,
   'rejectEpisode' : ActorMethod<[string], undefined>,
   'rejectPodcast' : ActorMethod<[string], undefined>,
+  'rejectWithdrawRequest' : ActorMethod<[string, string], undefined>,
   'removeWebsiteLogo' : ActorMethod<[], undefined>,
   'reorderTopVibingSongs' : ActorMethod<[Array<bigint>], undefined>,
   'requestApproval' : ActorMethod<[], undefined>,
+  'revokePremiumRole' : ActorMethod<[Principal], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'setAnnouncement' : ActorMethod<[string], undefined>,
   'setApproval' : ActorMethod<[Principal, ApprovalStatus], undefined>,
   'setArtistProfileEditingAccess' : ActorMethod<[boolean], undefined>,
   'setFeaturedArtist' : ActorMethod<[bigint, FeaturedArtistInput], undefined>,
+  'setSongRevenue' : ActorMethod<[string, number], undefined>,
   'setStripeConfiguration' : ActorMethod<[StripeConfiguration], undefined>,
   'setWebsiteLogo' : ActorMethod<[ExternalBlob], undefined>,
   'submitRSVP' : ActorMethod<[string, boolean, string], undefined>,
   'submitSong' : ActorMethod<[SongSubmissionInput], string>,
   'submitVideo' : ActorMethod<[VideoSubmissionInput], string>,
+  'submitWithdrawRequest' : ActorMethod<[WithdrawRequestInput], string>,
   'toggleFeaturedArtistSlot' : ActorMethod<[bigint, boolean], undefined>,
   'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
   'unblockUserPodcastSubmission' : ActorMethod<[Principal], undefined>,
   'unblockUserSongSubmission' : ActorMethod<[Principal], undefined>,
   'updateArtistProfile' : ActorMethod<
     [string, SaveArtistProfileInput],
+    undefined
+  >,
+  'updateLabelPartner' : ActorMethod<[LabelPartner], undefined>,
+  'updateLabelRelease' : ActorMethod<[LabelRelease], undefined>,
+  'updateMonthlyListenerStats' : ActorMethod<
+    [string, Array<MonthlyListenerStats>],
     undefined
   >,
   'updateSubscriptionPlan' : ActorMethod<[SubscriptionPlan], undefined>,
@@ -536,7 +720,7 @@ export interface _SERVICE {
     undefined
   >,
   'updateVideoSubmission' : ActorMethod<
-    [VideoSubmissionInput, string],
+    [string, VideoSubmissionInput],
     undefined
   >,
   'upgradeUserToTeamMember' : ActorMethod<[Principal], undefined>,

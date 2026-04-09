@@ -40,7 +40,7 @@ export default function VerificationRenewalSection() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="bg-white p-4 rounded-lg space-y-2">
+        <div className="bg-card p-4 rounded-lg space-y-2 border border-border">
           <h4 className="font-semibold text-sm">What you're missing:</h4>
           <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
             <li>Blue verified badge and Pro user status</li>

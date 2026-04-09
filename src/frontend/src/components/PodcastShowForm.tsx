@@ -14,11 +14,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Language, PodcastCategory, PodcastType } from "../backend";
 import {
   useCreatePodcastShow,
   useIsCurrentUserBlockedPodcastSubmission,
 } from "../hooks/useQueries";
+import { Language, PodcastCategory, PodcastType } from "../lib/constants";
 import { fileToExternalBlob } from "../utils/fileToExternalBlob";
 
 export default function PodcastShowForm() {

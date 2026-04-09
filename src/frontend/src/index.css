@@ -5,57 +5,65 @@
 @layer base {
   :root {
     --radius: 0.625rem;
-    --background: 0.98 0 0;
-    --foreground: 0.15 0 0;
-    --card: 1 0 0;
-    --card-foreground: 0.15 0 0;
-    --popover: 1 0 0;
-    --popover-foreground: 0.15 0 0;
-    --primary: 0.55 0.25 280;
-    --primary-foreground: 0.98 0 0;
-    --secondary: 0.92 0.05 320;
-    --secondary-foreground: 0.15 0 0;
-    --muted: 0.94 0.02 280;
-    --muted-foreground: 0.5 0.05 280;
-    --accent: 0.9 0.08 300;
-    --accent-foreground: 0.15 0 0;
+    /* Light mode — purple-navy tinted palette */
+    --background: 0.96 0.012 245;
+    --foreground: 0.12 0.035 260;
+    --card: 0.98 0.008 245;
+    --card-foreground: 0.12 0.035 260;
+    --popover: 0.98 0.008 245;
+    --popover-foreground: 0.12 0.035 260;
+    --primary: 0.52 0.26 285;
+    --primary-foreground: 0.99 0 0;
+    --secondary: 0.88 0.05 245;
+    --secondary-foreground: 0.18 0.04 260;
+    --muted: 0.9 0.03 245;
+    --muted-foreground: 0.46 0.07 260;
+    --accent: 0.55 0.16 198;
+    --accent-foreground: 0.99 0 0;
     --destructive: 0.55 0.22 25;
-    --destructive-foreground: 0.98 0 0;
-    --border: 0.88 0.03 280;
-    --input: 0.88 0.03 280;
-    --ring: 0.55 0.25 280;
-    --chart-1: 0.6 0.22 280;
-    --chart-2: 0.65 0.2 320;
-    --chart-3: 0.55 0.18 200;
-    --chart-4: 0.7 0.25 340;
-    --chart-5: 0.6 0.2 260;
+    --destructive-foreground: 0.99 0 0;
+    --border: 0.84 0.04 260;
+    --input: 0.84 0.04 260;
+    --ring: 0.52 0.26 285;
+    --chart-1: 0.58 0.26 285;
+    --chart-2: 0.62 0.2 198;
+    --chart-3: 0.55 0.18 175;
+    --chart-4: 0.68 0.26 320;
+    --chart-5: 0.6 0.2 230;
+    /* Neon accent for cinematic borders (light) */
+    --fire-accent: 0.55 0.16 198;
+    --fire-glow: 0.45 0.18 198;
   }
 
   .dark {
-    --background: 0.12 0.02 280;
-    --foreground: 0.95 0.02 280;
-    --card: 0.16 0.03 280;
-    --card-foreground: 0.95 0.02 280;
-    --popover: 0.14 0.03 280;
-    --popover-foreground: 0.95 0.02 280;
-    --primary: 0.65 0.25 280;
-    --primary-foreground: 0.98 0 0;
-    --secondary: 0.22 0.05 280;
-    --secondary-foreground: 0.95 0.02 280;
-    --muted: 0.2 0.04 280;
-    --muted-foreground: 0.6 0.08 280;
-    --accent: 0.28 0.08 300;
-    --accent-foreground: 0.95 0.02 280;
-    --destructive: 0.6 0.25 25;
-    --destructive-foreground: 0.98 0 0;
-    --border: 0.25 0.05 280;
-    --input: 0.25 0.05 280;
-    --ring: 0.65 0.25 280;
-    --chart-1: 0.65 0.25 280;
-    --chart-2: 0.7 0.22 320;
-    --chart-3: 0.6 0.2 200;
-    --chart-4: 0.75 0.28 340;
-    --chart-5: 0.65 0.22 260;
+    /* Dark mode — Neon Noir: deep navy + electric purple/cyan */
+    --background: 0.1 0.02 245;
+    --foreground: 0.95 0.015 245;
+    --card: 0.14 0.025 245;
+    --card-foreground: 0.95 0.015 245;
+    --popover: 0.12 0.022 245;
+    --popover-foreground: 0.95 0.015 245;
+    --primary: 0.65 0.28 285;
+    --primary-foreground: 0.99 0 0;
+    --secondary: 0.2 0.05 245;
+    --secondary-foreground: 0.95 0.015 245;
+    --muted: 0.18 0.035 245;
+    --muted-foreground: 0.58 0.08 245;
+    --accent: 0.72 0.18 198;
+    --accent-foreground: 0.1 0.02 245;
+    --destructive: 0.58 0.24 25;
+    --destructive-foreground: 0.99 0 0;
+    --border: 0.22 0.045 260;
+    --input: 0.22 0.045 260;
+    --ring: 0.65 0.28 285;
+    --chart-1: 0.65 0.28 285;
+    --chart-2: 0.72 0.18 198;
+    --chart-3: 0.62 0.2 175;
+    --chart-4: 0.7 0.24 320;
+    --chart-5: 0.6 0.22 230;
+    /* Neon Noir accent — cyan glow for cinematic borders */
+    --fire-accent: 0.72 0.18 198;
+    --fire-glow: 0.62 0.2 198;
   }
 
   * {

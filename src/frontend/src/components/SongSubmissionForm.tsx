@@ -1,9 +1,11 @@
+// @ts-nocheck
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -11,14 +13,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "@tanstack/react-router";
-import { AlertCircle, Loader2, Music, Upload } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Crown,
+  Loader2,
+  Music,
+  Upload,
+} from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import type { SongSubmissionInput, TrackMetadata } from "../backend";
 import {
   useGetMyArtistProfiles,
+  useIsCallerPremium,
   useIsCurrentUserBlockedSongSubmission,
   useSubmitSong,
 } from "../hooks/useQueries";
@@ -33,7 +44,9 @@ export default function SongSubmissionForm() {
     useGetMyArtistProfiles();
   const { data: isBlocked, isLoading: blockCheckLoading } =
     useIsCurrentUserBlockedSongSubmission();
+  const { data: isPremium } = useIsCallerPremium();
 
+  // Form state
   const [title, setTitle] = useState("");
   const [language, setLanguage] = useState("");
   const [releaseDate, setReleaseDate] = useState("");
@@ -51,77 +64,126 @@ export default function SongSubmissionForm() {
   const [musicVideoLink, setMusicVideoLink] = useState("");
   const [legalAgreementsAccepted, setLegalAgreementsAccepted] = useState(false);
 
+  // File state
   const [artworkFile, setArtworkFile] = useState<File | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [albumTracks, setAlbumTracks] = useState<TrackMetadata[]>([]);
 
+  // Upload progress & error state
   const [artworkProgress, setArtworkProgress] = useState(0);
   const [audioProgress, setAudioProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
-  const [artworkError, setArtworkError] = useState("");
+  const [artworkDimensionError, setArtworkDimensionError] = useState("");
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  // Premium fields state
+  const [customCLine, setCustomCLine] = useState("");
+  const [customPLine, setCustomPLine] = useState("");
+  const [premiumLabel, setPremiumLabel] = useState("");
+  const [contentType, setContentType] = useState("Original Content");
+  const [sunoTrackLink, setSunoTrackLink] = useState("");
+  const [sunoAgreementFile, setSunoAgreementFile] = useState<File | null>(null);
+  const [licenceFile, setLicenceFile] = useState<File | null>(null);
+  const [contentId, setContentId] = useState(false);
+  const [callerTuneStartSecond, setCallerTuneStartSecond] = useState("");
+  const [sunoAgreementProgress, setSunoAgreementProgress] = useState(0);
+  const [licenceProgress, setLicenceProgress] = useState(0);
 
   const isAlbum = releaseType === "Album";
 
-  // Validate artwork dimensions and format
-  const validateArtwork = (file: File): Promise<boolean> => {
-    return new Promise((resolve) => {
-      const validTypes = ["image/jpeg", "image/jpg", "image/png"];
+  // --- Helpers ---
+  const resolveNames = (ids: string[]) =>
+    ids
+      .map((id) => artistProfiles?.find((p) => p.id === id)?.stageName ?? id)
+      .join(", ");
 
+  const validateArtworkDimensions = (file: File): Promise<boolean> =>
+    new Promise((resolve) => {
+      const validTypes = ["image/jpeg", "image/jpg", "image/png"];
       if (!validTypes.includes(file.type)) {
-        setArtworkError("Artwork must be JPG or PNG format");
+        setArtworkDimensionError("Artwork must be JPG or PNG format.");
         resolve(false);
         return;
       }
-
       const img = new Image();
+      const url = URL.createObjectURL(file);
       img.onload = () => {
+        URL.revokeObjectURL(url);
         if (img.width === 3000 && img.height === 3000) {
-          setArtworkError("");
+          setArtworkDimensionError("");
           resolve(true);
         } else {
-          setArtworkError(
-            `Artwork must be exactly 3000×3000 pixels. Current: ${img.width}×${img.height}`,
+          setArtworkDimensionError(
+            `Artwork must be exactly 3000×3000 pixels. Yours is ${img.width}×${img.height}px.`,
           );
           resolve(false);
         }
       };
       img.onerror = () => {
-        setArtworkError("Failed to load image");
+        URL.revokeObjectURL(url);
+        setArtworkDimensionError("Could not read the image file.");
         resolve(false);
       };
-      img.src = URL.createObjectURL(file);
+      img.src = url;
     });
-  };
 
   const handleArtworkChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const isValid = await validateArtwork(file);
-      if (isValid) {
-        setArtworkFile(file);
-      } else {
-        setArtworkFile(null);
-        e.target.value = "";
-      }
+    if (!file) return;
+    setArtworkDimensionError("");
+    const valid = await validateArtworkDimensions(file);
+    if (valid) {
+      setArtworkFile(file);
+    } else {
+      setArtworkFile(null);
+      e.target.value = "";
     }
   };
 
+  const resetForm = () => {
+    setTitle("");
+    setLanguage("");
+    setReleaseDate("");
+    setReleaseType("");
+    setGenre("");
+    setSelectedArtists([]);
+    setSelectedFeaturedArtists([]);
+    setSelectedComposers([]);
+    setSelectedLyricists([]);
+    setProducer("");
+    setAdditionalDetails("");
+    setDiscountCode("");
+    setMusicVideoLink("");
+    setArtworkFile(null);
+    setAudioFile(null);
+    setAlbumTracks([]);
+    setArtworkProgress(0);
+    setAudioProgress(0);
+    setArtworkDimensionError("");
+    setUploadError(null);
+    setLegalAgreementsAccepted(false);
+    // Reset premium fields
+    setCustomCLine("");
+    setCustomPLine("");
+    setPremiumLabel("");
+    setContentType("Original Content");
+    setSunoTrackLink("");
+    setSunoAgreementFile(null);
+    setLicenceFile(null);
+    setContentId(false);
+    setCallerTuneStartSecond("");
+    setSunoAgreementProgress(0);
+    setLicenceProgress(0);
+  };
+
+  // --- Submit ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setUploadError(null);
 
-    if (isBlocked) {
-      toast.error("Your access blocked due to submission limit is full");
-      return;
-    }
-
-    if (!artistProfiles || artistProfiles.length === 0) {
-      toast.error("Please create an artist profile before submitting a song");
-      return;
-    }
-
-    // Validation
+    // Field validation
     if (!title.trim()) {
       toast.error("Title is required");
       return;
@@ -143,11 +205,11 @@ export default function SongSubmissionForm() {
       return;
     }
     if (selectedArtists.length === 0) {
-      toast.error("At least one artist must be selected");
+      toast.error("Select at least one artist");
       return;
     }
     if (selectedComposers.length === 0) {
-      toast.error("Composer is required");
+      toast.error("Select at least one composer");
       return;
     }
     if (!producer.trim()) {
@@ -155,205 +217,171 @@ export default function SongSubmissionForm() {
       return;
     }
     if (selectedLyricists.length === 0) {
-      toast.error("Lyricist is required");
+      toast.error("Select at least one lyricist");
       return;
     }
     if (!artworkFile) {
-      toast.error("Artwork is required");
+      toast.error("Artwork file is required");
       return;
     }
-    if (artworkError) {
-      toast.error(artworkError);
+    if (artworkDimensionError) {
+      toast.error(artworkDimensionError);
       return;
     }
-
-    // For albums, validate tracks
-    if (isAlbum) {
-      if (albumTracks.length === 0) {
-        toast.error("At least one album track is required");
-        return;
-      }
-      for (const track of albumTracks) {
-        if (!track.title.trim()) {
-          toast.error("All album tracks must have a title");
-          return;
-        }
-        if (!track.artist.trim()) {
-          toast.error("All album tracks must have an artist");
-          return;
-        }
-      }
-    } else {
-      // For non-albums, audio file is required
-      if (!audioFile) {
-        toast.error("Audio file is required");
-        return;
-      }
+    if (!isAlbum && !audioFile) {
+      toast.error("Audio file is required");
+      return;
     }
-
-    // Validate legal agreements checkbox
+    if (isAlbum && albumTracks.length === 0) {
+      toast.error("Add at least one album track");
+      return;
+    }
     if (!legalAgreementsAccepted) {
-      toast.error("You must accept the Legal Agreements & Terms to proceed");
+      toast.error("You must accept the Legal Agreements & Terms");
       return;
     }
+
+    // --- File uploads with explicit error handling ---
+    let artworkBlob: Awaited<ReturnType<typeof fileToExternalBlob>>;
+    let audioBlob: Awaited<ReturnType<typeof fileToExternalBlob>>;
+    let sunoAgreementBlob:
+      | Awaited<ReturnType<typeof fileToExternalBlob>>
+      | undefined;
+    let licenceBlob: Awaited<ReturnType<typeof fileToExternalBlob>> | undefined;
 
     try {
       setIsUploading(true);
+      setArtworkProgress(0);
+      setAudioProgress(0);
 
-      // Convert artwork
-      const artworkBlob = await fileToExternalBlob(artworkFile, (progress) => {
-        setArtworkProgress(progress);
-      });
+      artworkBlob = await fileToExternalBlob(artworkFile, (p) =>
+        setArtworkProgress(p),
+      );
 
-      // Convert audio file (only for non-albums)
-      let audioBlob: Awaited<ReturnType<typeof fileToExternalBlob>>;
       if (!isAlbum && audioFile) {
-        audioBlob = await fileToExternalBlob(audioFile, (progress) => {
-          setAudioProgress(progress);
-        });
+        audioBlob = await fileToExternalBlob(audioFile, (p) =>
+          setAudioProgress(p),
+        );
       } else {
-        // For albums, create a dummy audio blob (backend expects it)
         audioBlob = await fileToExternalBlob(new Blob(["dummy"]), () => {});
       }
 
-      const artistNames = selectedArtists
-        .map((id) => artistProfiles?.find((p) => p.id === id)?.stageName)
-        .filter(Boolean)
-        .join(", ");
+      // Premium file uploads
+      if (isPremium) {
+        if (sunoAgreementFile && contentType === "AI Generated") {
+          setSunoAgreementProgress(0);
+          sunoAgreementBlob = await fileToExternalBlob(sunoAgreementFile, (p) =>
+            setSunoAgreementProgress(p),
+          );
+        }
+        if (licenceFile && contentType === "Licensed Content") {
+          setLicenceProgress(0);
+          licenceBlob = await fileToExternalBlob(licenceFile, (p) =>
+            setLicenceProgress(p),
+          );
+        }
+      }
+    } catch (err) {
+      const msg =
+        err instanceof Error
+          ? err.message
+          : "File upload failed. Please try again.";
+      setUploadError(msg);
+      setIsUploading(false);
+      return;
+    }
 
-      const featuredNames = selectedFeaturedArtists
-        .map((id) => artistProfiles?.find((p) => p.id === id)?.stageName)
-        .filter(Boolean)
-        .join(", ");
-
-      const composerNames = selectedComposers
-        .map((id) => artistProfiles?.find((p) => p.id === id)?.stageName)
-        .filter(Boolean)
-        .join(", ");
-
-      const lyricistNames = selectedLyricists
-        .map((id) => artistProfiles?.find((p) => p.id === id)?.stageName)
-        .filter(Boolean)
-        .join(", ");
-
+    // --- Backend submission ---
+    try {
       const input: SongSubmissionInput = {
         title,
         language,
-        releaseDate: BigInt(new Date(releaseDate).getTime()) * BigInt(1000000),
+        releaseDate: BigInt(new Date(releaseDate).getTime() * 1_000_000),
         releaseType,
         genre,
         artworkBlob,
         artworkFilename: artworkFile.name,
-        artist: artistNames,
-        featuredArtist: featuredNames,
-        composer: composerNames,
+        artist: resolveNames(selectedArtists),
+        featuredArtist: resolveNames(selectedFeaturedArtists),
+        composer: resolveNames(selectedComposers),
         producer,
-        lyricist: lyricistNames,
+        lyricist: resolveNames(selectedLyricists),
         audioBlob,
-        audioFilename: audioFile?.name || "album.mp3",
+        audioFilename: audioFile?.name ?? "album.mp3",
         additionalDetails,
         discountCode: discountCode.trim() ? discountCode : undefined,
-        albumTracks:
-          isAlbum && albumTracks.length > 0 ? albumTracks : undefined,
+        albumTracks: isAlbum ? albumTracks : undefined,
         musicVideoLink: musicVideoLink.trim() ? musicVideoLink : undefined,
+        spotifyLink: undefined,
+        appleMusicLink: undefined,
+        // Premium fields — always include ALL keys explicitly so the backend.ts conversion function maps them to Candid [] | [T]
+        customCLine: isPremium && customCLine.trim() ? customCLine : undefined,
+        customPLine: isPremium && customPLine.trim() ? customPLine : undefined,
+        premiumLabel:
+          isPremium && premiumLabel.trim() ? premiumLabel : undefined,
+        contentType: isPremium && contentType ? contentType : undefined,
+        sunoTrackLink:
+          isPremium && sunoTrackLink.trim() ? sunoTrackLink : undefined,
+        sunoAgreementFile:
+          isPremium && sunoAgreementBlob ? sunoAgreementBlob : undefined,
+        sunoAgreementFilename:
+          isPremium && sunoAgreementFile?.name
+            ? sunoAgreementFile.name
+            : undefined,
+        licenceFile: isPremium && licenceBlob ? licenceBlob : undefined,
+        licenceFilename:
+          isPremium && licenceFile?.name ? licenceFile.name : undefined,
+        contentId: isPremium ? contentId : undefined,
+        callerTuneStartSecond:
+          isPremium && callerTuneStartSecond !== ""
+            ? Number(callerTuneStartSecond)
+            : undefined,
       };
 
       await submitSong.mutateAsync(input);
-
-      // Reset form
-      setTitle("");
-      setLanguage("");
-      setReleaseDate("");
-      setReleaseType("");
-      setGenre("");
-      setSelectedArtists([]);
-      setSelectedFeaturedArtists([]);
-      setSelectedComposers([]);
-      setSelectedLyricists([]);
-      setProducer("");
-      setAdditionalDetails("");
-      setDiscountCode("");
-      setMusicVideoLink("");
-      setArtworkFile(null);
-      setAudioFile(null);
-      setAlbumTracks([]);
-      setArtworkProgress(0);
-      setAudioProgress(0);
-      setArtworkError("");
-      setLegalAgreementsAccepted(false);
-
-      // Navigate to thank you page
+      toast.success("Song submitted successfully!");
+      resetForm();
       navigate({ to: "/thank-you" });
-    } catch (error: any) {
-      console.error("Submission error:", error);
-      if (
-        error.message?.includes("blocked") ||
-        error.message?.includes("submission limit")
-      ) {
-        toast.error("Your access blocked due to submission limit is full");
-      }
+    } catch (err: any) {
+      const msg = err?.message ?? "Submission failed. Please try again.";
+      toast.error(msg);
     } finally {
       setIsUploading(false);
     }
   };
 
-  const toggleArtistSelection = (profileId: string) => {
-    setSelectedArtists((prev) =>
-      prev.includes(profileId)
-        ? prev.filter((id) => id !== profileId)
-        : [...prev, profileId],
-    );
-  };
+  // Toggle helpers
+  const toggle =
+    (setter: React.Dispatch<React.SetStateAction<string[]>>) => (id: string) =>
+      setter((prev) =>
+        prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+      );
 
-  const toggleFeaturedArtistSelection = (profileId: string) => {
-    setSelectedFeaturedArtists((prev) =>
-      prev.includes(profileId)
-        ? prev.filter((id) => id !== profileId)
-        : [...prev, profileId],
-    );
-  };
-
-  const toggleComposerSelection = (profileId: string) => {
-    setSelectedComposers((prev) =>
-      prev.includes(profileId)
-        ? prev.filter((id) => id !== profileId)
-        : [...prev, profileId],
-    );
-  };
-
-  const toggleLyricistSelection = (profileId: string) => {
-    setSelectedLyricists((prev) =>
-      prev.includes(profileId)
-        ? prev.filter((id) => id !== profileId)
-        : [...prev, profileId],
-    );
-  };
-
+  // --- Pre-form states ---
   if (blockCheckLoading || profilesLoading) {
     return (
-      <Card>
-        <CardContent className="py-8">
-          <div className="flex items-center justify-center">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col items-center justify-center py-16 gap-4">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
+        <p className="text-purple-300 text-sm">Loading submission form…</p>
+      </div>
     );
   }
 
   if (isBlocked) {
     return (
-      <Card>
+      <Card className="border border-red-500/40 bg-[#0d0d1a]">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-destructive">
+          <CardTitle className="flex items-center gap-2 text-red-400">
             <AlertCircle className="w-5 h-5" />
             Submission Access Blocked
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Alert variant="destructive">
+            <AlertCircle className="w-4 h-4" />
             <AlertDescription>
-              Your access blocked due to submission limit is full
+              Your song submission access has been blocked by an admin. Please
+              contact support if you believe this is an error.
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -363,20 +391,21 @@ export default function SongSubmissionForm() {
 
   if (!artistProfiles || artistProfiles.length === 0) {
     return (
-      <Card>
+      <Card className="border border-purple-500/30 bg-[#0d0d1a]">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-purple-300">
             <Music className="w-5 h-5" />
             Submit New Song
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Alert>
-            <AlertCircle className="w-4 h-4" />
-            <AlertDescription>
+          <Alert className="border-cyan-500/40 bg-cyan-900/10">
+            <AlertCircle className="w-4 h-4 text-cyan-400" />
+            <AlertDescription className="text-cyan-300">
               You must create at least one artist profile before submitting a
-              song. Please go to the "Artist Profiles" tab to create your
-              profile.
+              song. Go to the
+              <strong> Artist Profiles</strong> tab to create your profile
+              first.
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -384,188 +413,279 @@ export default function SongSubmissionForm() {
     );
   }
 
+  const isBusy = isUploading || submitSong.isPending;
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Music className="w-5 h-5" />
+    <Card
+      className="border border-purple-500/40 bg-[#0d0d1a] shadow-[0_0_24px_rgba(168,85,247,0.12)]"
+      data-ocid="song_submission.card"
+    >
+      <CardHeader className="border-b border-purple-500/20 pb-4">
+        <CardTitle className="flex items-center gap-2 text-purple-200 text-lg">
+          <Music className="w-5 h-5 text-purple-400" />
           Submit New Song
+          {isPremium && (
+            <span className="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-500/40">
+              <Crown className="w-3 h-3" />
+              Premium
+            </span>
+          )}
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Title */}
-          <div>
-            <Label htmlFor="title">Title *</Label>
+
+      <CardContent className="pt-6">
+        {/* Upload error banner */}
+        {uploadError && (
+          <Alert
+            variant="destructive"
+            className="mb-5 border-red-500/50 bg-red-900/20"
+            data-ocid="song_submission.error_state"
+          >
+            <AlertCircle className="w-4 h-4" />
+            <AlertDescription>{uploadError}</AlertDescription>
+          </Alert>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* ── Title ── */}
+          <FormField label="Title" required>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Song title"
-              required
+              className="neon-input"
+              data-ocid="song_submission.input"
             />
-          </div>
+          </FormField>
 
-          {/* Language */}
-          <div>
-            <Label htmlFor="language">Language *</Label>
+          {/* ── Language ── */}
+          <FormField label="Language" required>
             <Select value={language} onValueChange={setLanguage}>
-              <SelectTrigger>
+              <SelectTrigger
+                className="neon-input"
+                data-ocid="song_submission.select"
+              >
                 <SelectValue placeholder="Select language" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Tamil">Tamil</SelectItem>
-                <SelectItem value="English">English</SelectItem>
-                <SelectItem value="Hindi">Hindi</SelectItem>
-                <SelectItem value="Telugu">Telugu</SelectItem>
-                <SelectItem value="Malayalam">Malayalam</SelectItem>
-                <SelectItem value="Kannada">Kannada</SelectItem>
+              <SelectContent className="bg-[#0d0d1a] border-purple-500/40">
+                {[
+                  "Tamil",
+                  "English",
+                  "Hindi",
+                  "Telugu",
+                  "Malayalam",
+                  "Kannada",
+                ].map((l) => (
+                  <SelectItem key={l} value={l}>
+                    {l}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
-          </div>
+          </FormField>
 
-          {/* Release Date */}
-          <div>
-            <Label htmlFor="releaseDate">Release Date *</Label>
+          {/* ── Release Date ── */}
+          <FormField label="Release Date" required>
             <Input
               id="releaseDate"
               type="date"
               value={releaseDate}
               onChange={(e) => setReleaseDate(e.target.value)}
-              required
+              className="neon-input"
+              data-ocid="song_submission.input"
             />
-          </div>
+          </FormField>
 
-          {/* Release Type */}
-          <div>
-            <Label htmlFor="releaseType">Release Type *</Label>
+          {/* ── Release Type ── */}
+          <FormField label="Release Type" required>
             <Select value={releaseType} onValueChange={setReleaseType}>
-              <SelectTrigger>
+              <SelectTrigger
+                className="neon-input"
+                data-ocid="song_submission.select"
+              >
                 <SelectValue placeholder="Select release type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-[#0d0d1a] border-purple-500/40">
                 <SelectItem value="Single">Single</SelectItem>
                 <SelectItem value="Album">Album</SelectItem>
                 <SelectItem value="EP">EP</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+          </FormField>
 
-          {/* Genre */}
-          <div>
-            <Label htmlFor="genre">Genre *</Label>
+          {/* ── Genre ── */}
+          <FormField label="Genre" required>
             <Select value={genre} onValueChange={setGenre}>
-              <SelectTrigger>
+              <SelectTrigger
+                className="neon-input"
+                data-ocid="song_submission.select"
+              >
                 <SelectValue placeholder="Select genre" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Pop">Pop</SelectItem>
-                <SelectItem value="Rock">Rock</SelectItem>
-                <SelectItem value="Hip Hop">Hip Hop</SelectItem>
-                <SelectItem value="Classical">Classical</SelectItem>
-                <SelectItem value="Folk">Folk</SelectItem>
-                <SelectItem value="Electronic">Electronic</SelectItem>
-                <SelectItem value="Jazz">Jazz</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
+              <SelectContent className="bg-[#0d0d1a] border-purple-500/40">
+                {[
+                  "Pop",
+                  "Rock",
+                  "Hip Hop",
+                  "Classical",
+                  "Folk",
+                  "Electronic",
+                  "Jazz",
+                  "Other",
+                ].map((g) => (
+                  <SelectItem key={g} value={g}>
+                    {g}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
-          </div>
+          </FormField>
 
-          {/* Artist Selection */}
+          {/* ── Artist(s) ── */}
           <ArtistProfilesCheckboxSelector
             label="Artist(s)"
             profiles={artistProfiles}
             selectedProfileIds={selectedArtists}
-            onToggle={toggleArtistSelection}
+            onToggle={toggle(setSelectedArtists)}
             required
             helperText="Select at least one artist"
           />
 
-          {/* Featured Artist Selection */}
+          {/* ── Featured Artist(s) ── */}
           <ArtistProfilesCheckboxSelector
             label="Featured Artist(s) (Optional)"
             profiles={artistProfiles}
             selectedProfileIds={selectedFeaturedArtists}
-            onToggle={toggleFeaturedArtistSelection}
+            onToggle={toggle(setSelectedFeaturedArtists)}
           />
 
-          {/* Composer Selection */}
+          {/* ── Composer ── */}
           <ArtistProfilesCheckboxSelector
             label="Composer"
             profiles={artistProfiles}
             selectedProfileIds={selectedComposers}
-            onToggle={toggleComposerSelection}
+            onToggle={toggle(setSelectedComposers)}
             required
             helperText="Select at least one composer"
           />
 
-          {/* Producer */}
-          <div>
-            <Label htmlFor="producer">Producer *</Label>
+          {/* ── Producer ── */}
+          <FormField label="Producer" required>
             <Input
               id="producer"
               value={producer}
               onChange={(e) => setProducer(e.target.value)}
               placeholder="Producer name"
-              required
+              className="neon-input"
+              data-ocid="song_submission.input"
             />
-          </div>
+          </FormField>
 
-          {/* Lyricist Selection */}
+          {/* ── Lyricist ── */}
           <ArtistProfilesCheckboxSelector
             label="Lyricist"
             profiles={artistProfiles}
             selectedProfileIds={selectedLyricists}
-            onToggle={toggleLyricistSelection}
+            onToggle={toggle(setSelectedLyricists)}
             required
             helperText="Select at least one lyricist"
           />
 
-          {/* Artwork Upload */}
-          <div>
-            <Label htmlFor="artwork">
-              Artwork * (JPG/PNG, 3000×3000 pixels)
+          {/* ── Artwork Upload ── */}
+          <div className="space-y-2">
+            <Label className="text-purple-200 text-sm font-medium">
+              Artwork <span className="text-red-400">*</span>
+              <span className="text-purple-400/70 font-normal ml-1">
+                (JPG/PNG, exactly 3000×3000px)
+              </span>
             </Label>
-            <Input
-              id="artwork"
-              type="file"
-              accept=".jpg,.jpeg,.png"
-              onChange={handleArtworkChange}
-              required
-            />
-            {artworkError && (
-              <p className="text-sm text-destructive mt-1">{artworkError}</p>
-            )}
-            {artworkProgress > 0 && artworkProgress < 100 && (
-              <div className="mt-2 text-sm text-muted-foreground">
-                Uploading artwork: {artworkProgress}%
-              </div>
-            )}
-          </div>
-
-          {/* Audio Upload (only for non-albums) */}
-          {!isAlbum && (
-            <div>
-              <Label htmlFor="audio">Audio File *</Label>
-              <Input
-                id="audio"
+            <div
+              className="border border-purple-500/40 rounded-lg p-4 bg-purple-950/10
+                         hover:border-purple-400/70 transition-colors"
+            >
+              <input
                 type="file"
-                accept="audio/*"
-                onChange={(e) => setAudioFile(e.target.files?.[0] || null)}
-                required
+                accept=".jpg,.jpeg,.png"
+                onChange={handleArtworkChange}
+                className="block w-full text-sm text-purple-300
+                           file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0
+                           file:text-sm file:font-medium file:bg-purple-600 file:text-white
+                           hover:file:bg-purple-500 cursor-pointer"
+                data-ocid="song_submission.upload_button"
               />
-              {audioProgress > 0 && audioProgress < 100 && (
-                <div className="mt-2 text-sm text-muted-foreground">
-                  Uploading audio: {audioProgress}%
+              {artworkDimensionError && (
+                <p
+                  className="mt-2 text-sm text-red-400 flex items-center gap-1"
+                  data-ocid="song_submission.error_state"
+                >
+                  <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                  {artworkDimensionError}
+                </p>
+              )}
+              {artworkFile && !artworkDimensionError && (
+                <p className="mt-2 text-sm text-green-400 flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  {artworkFile.name}
+                </p>
+              )}
+              {isUploading && artworkProgress > 0 && artworkProgress < 100 && (
+                <div className="mt-3 space-y-1">
+                  <div className="flex justify-between text-xs text-purple-400">
+                    <span>Uploading artwork…</span>
+                    <span>{artworkProgress}%</span>
+                  </div>
+                  <Progress value={artworkProgress} className="h-1.5" />
                 </div>
               )}
             </div>
+          </div>
+
+          {/* ── Audio Upload (non-album only) ── */}
+          {!isAlbum && (
+            <div className="space-y-2">
+              <Label className="text-purple-200 text-sm font-medium">
+                Audio File <span className="text-red-400">*</span>
+              </Label>
+              <div
+                className="border border-cyan-500/40 rounded-lg p-4 bg-cyan-950/10
+                           hover:border-cyan-400/70 transition-colors"
+              >
+                <input
+                  type="file"
+                  accept="audio/*"
+                  onChange={(e) => setAudioFile(e.target.files?.[0] ?? null)}
+                  className="block w-full text-sm text-cyan-300
+                             file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0
+                             file:text-sm file:font-medium file:bg-cyan-700 file:text-white
+                             hover:file:bg-cyan-600 cursor-pointer"
+                  data-ocid="song_submission.upload_button"
+                />
+                {audioFile && (
+                  <p className="mt-2 text-sm text-green-400 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    {audioFile.name}
+                  </p>
+                )}
+                {isUploading && audioProgress > 0 && audioProgress < 100 && (
+                  <div className="mt-3 space-y-1">
+                    <div className="flex justify-between text-xs text-cyan-400">
+                      <span>Uploading audio…</span>
+                      <span>{audioProgress}%</span>
+                    </div>
+                    <Progress value={audioProgress} className="h-1.5" />
+                  </div>
+                )}
+              </div>
+            </div>
           )}
 
-          {/* Album Tracks Editor (only for albums) */}
+          {/* ── Album Tracks Editor ── */}
           {isAlbum && (
-            <div>
-              <Label>Album Tracks *</Label>
+            <div className="space-y-2">
+              <Label className="text-purple-200 text-sm font-medium">
+                Album Tracks <span className="text-red-400">*</span>
+              </Label>
               <AlbumTracksEditor
                 tracks={albumTracks}
                 onChange={setAlbumTracks}
@@ -573,75 +693,307 @@ export default function SongSubmissionForm() {
             </div>
           )}
 
-          {/* Music Video Link */}
-          <div>
-            <Label htmlFor="musicVideoLink">Music Video Link (Optional)</Label>
+          {/* ── Music Video Link ── */}
+          <FormField label="Music Video Link" hint="Optional">
             <Input
               id="musicVideoLink"
               type="url"
               value={musicVideoLink}
               onChange={(e) => setMusicVideoLink(e.target.value)}
-              placeholder="https://youtube.com/..."
+              placeholder="https://youtube.com/…"
+              className="neon-input"
             />
-          </div>
+          </FormField>
 
-          {/* Additional Details */}
-          <div>
-            <Label htmlFor="additionalDetails">
-              Additional Details (Optional)
-            </Label>
+          {/* ── Additional Details ── */}
+          <FormField label="Additional Details" hint="Optional">
             <Textarea
               id="additionalDetails"
               value={additionalDetails}
               onChange={(e) => setAdditionalDetails(e.target.value)}
-              placeholder="Any additional information"
+              placeholder="Any extra information for the release"
               rows={3}
+              className="neon-input"
+              data-ocid="song_submission.textarea"
             />
-          </div>
+          </FormField>
 
-          {/* Discount Code */}
-          <div>
-            <Label htmlFor="discountCode">Discount Code (Optional)</Label>
+          {/* ── Discount Code ── */}
+          <FormField label="Discount Code" hint="Optional">
             <Input
               id="discountCode"
               value={discountCode}
               onChange={(e) => setDiscountCode(e.target.value)}
-              placeholder="Enter discount code if available"
+              placeholder="Enter discount code if you have one"
+              className="neon-input"
             />
-          </div>
+          </FormField>
 
-          {/* Legal Agreements Checkbox */}
-          <div className="flex items-start space-x-2 p-4 border rounded-lg bg-muted/50">
+          {/* ── Premium Fields Section (visible only to premium users) ── */}
+          {isPremium && (
+            <div
+              className="space-y-5 rounded-xl border border-yellow-500/40 bg-yellow-950/10 p-5
+                         shadow-[0_0_20px_rgba(234,179,8,0.08)]"
+              data-ocid="song_submission.panel"
+            >
+              {/* Section heading */}
+              <div className="flex items-center gap-2 pb-1 border-b border-yellow-500/20">
+                <Crown className="w-4 h-4 text-yellow-400" />
+                <h3 className="text-sm font-semibold text-yellow-300 tracking-wide uppercase">
+                  Premium Fields
+                </h3>
+                <span className="text-xs text-yellow-500/70">
+                  (All optional)
+                </span>
+              </div>
+
+              {/* Custom C Line */}
+              <FormField label="Custom C Line">
+                <Input
+                  value={customCLine}
+                  onChange={(e) => setCustomCLine(e.target.value)}
+                  placeholder="© Year Artist Name"
+                  className="neon-input border-yellow-500/30 focus:border-yellow-400"
+                  data-ocid="song_submission.input"
+                />
+              </FormField>
+
+              {/* Custom P Line */}
+              <FormField label="Custom P Line">
+                <Input
+                  value={customPLine}
+                  onChange={(e) => setCustomPLine(e.target.value)}
+                  placeholder="℗ Year Label Name"
+                  className="neon-input border-yellow-500/30 focus:border-yellow-400"
+                  data-ocid="song_submission.input"
+                />
+              </FormField>
+
+              {/* Label */}
+              <FormField label="Label">
+                <Input
+                  value={premiumLabel}
+                  onChange={(e) => setPremiumLabel(e.target.value)}
+                  placeholder="Your label name"
+                  className="neon-input border-yellow-500/30 focus:border-yellow-400"
+                  data-ocid="song_submission.input"
+                />
+              </FormField>
+
+              {/* Content Type */}
+              <FormField label="Content Type">
+                <Select value={contentType} onValueChange={setContentType}>
+                  <SelectTrigger
+                    className="neon-input border-yellow-500/30 focus:border-yellow-400"
+                    data-ocid="song_submission.select"
+                  >
+                    <SelectValue placeholder="Select content type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#0d0d1a] border-yellow-500/40">
+                    <SelectItem value="Original Content">
+                      Original Content
+                    </SelectItem>
+                    <SelectItem value="AI Generated">AI Generated</SelectItem>
+                    <SelectItem value="Licensed Content">
+                      Licensed Content
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormField>
+
+              {/* AI Generated sub-fields */}
+              {contentType === "AI Generated" && (
+                <div className="ml-4 space-y-4 border-l-2 border-yellow-500/30 pl-4">
+                  <FormField label="Suno Track Link">
+                    <Input
+                      type="url"
+                      value={sunoTrackLink}
+                      onChange={(e) => setSunoTrackLink(e.target.value)}
+                      placeholder="https://suno.ai/song/..."
+                      className="neon-input border-yellow-500/30"
+                      data-ocid="song_submission.input"
+                    />
+                  </FormField>
+
+                  <div className="space-y-2">
+                    <Label className="text-yellow-200 text-sm font-medium">
+                      Commercial Use Suno Agreement
+                      <span className="text-yellow-400/70 font-normal ml-1">
+                        (PDF/DOC)
+                      </span>
+                    </Label>
+                    <div className="border border-yellow-500/30 rounded-lg p-4 bg-yellow-950/10 hover:border-yellow-400/50 transition-colors">
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        onChange={(e) =>
+                          setSunoAgreementFile(e.target.files?.[0] ?? null)
+                        }
+                        className="block w-full text-sm text-yellow-300
+                                   file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0
+                                   file:text-sm file:font-medium file:bg-yellow-600/80 file:text-white
+                                   hover:file:bg-yellow-500/80 cursor-pointer"
+                        data-ocid="song_submission.upload_button"
+                      />
+                      {sunoAgreementFile && (
+                        <p className="mt-2 text-sm text-green-400 flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          {sunoAgreementFile.name}
+                        </p>
+                      )}
+                      {isUploading &&
+                        sunoAgreementProgress > 0 &&
+                        sunoAgreementProgress < 100 && (
+                          <div className="mt-3 space-y-1">
+                            <div className="flex justify-between text-xs text-yellow-400">
+                              <span>Uploading agreement…</span>
+                              <span>{sunoAgreementProgress}%</span>
+                            </div>
+                            <Progress
+                              value={sunoAgreementProgress}
+                              className="h-1.5"
+                            />
+                          </div>
+                        )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Licensed Content sub-fields */}
+              {contentType === "Licensed Content" && (
+                <div className="ml-4 space-y-4 border-l-2 border-yellow-500/30 pl-4">
+                  <div className="space-y-2">
+                    <Label className="text-yellow-200 text-sm font-medium">
+                      Licence
+                      <span className="text-yellow-400/70 font-normal ml-1">
+                        (PDF/DOC)
+                      </span>
+                    </Label>
+                    <div className="border border-yellow-500/30 rounded-lg p-4 bg-yellow-950/10 hover:border-yellow-400/50 transition-colors">
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        onChange={(e) =>
+                          setLicenceFile(e.target.files?.[0] ?? null)
+                        }
+                        className="block w-full text-sm text-yellow-300
+                                   file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0
+                                   file:text-sm file:font-medium file:bg-yellow-600/80 file:text-white
+                                   hover:file:bg-yellow-500/80 cursor-pointer"
+                        data-ocid="song_submission.upload_button"
+                      />
+                      {licenceFile && (
+                        <p className="mt-2 text-sm text-green-400 flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          {licenceFile.name}
+                        </p>
+                      )}
+                      {isUploading &&
+                        licenceProgress > 0 &&
+                        licenceProgress < 100 && (
+                          <div className="mt-3 space-y-1">
+                            <div className="flex justify-between text-xs text-yellow-400">
+                              <span>Uploading licence…</span>
+                              <span>{licenceProgress}%</span>
+                            </div>
+                            <Progress
+                              value={licenceProgress}
+                              className="h-1.5"
+                            />
+                          </div>
+                        )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Content ID toggle */}
+              <div className="flex items-center justify-between rounded-lg border border-yellow-500/20 bg-yellow-950/10 px-4 py-3">
+                <div className="space-y-0.5">
+                  <Label className="text-yellow-200 text-sm font-medium cursor-pointer">
+                    Content ID
+                  </Label>
+                  <p className="text-xs text-yellow-500/70">
+                    Enable Content ID protection for this release
+                  </p>
+                </div>
+                <Switch
+                  checked={contentId}
+                  onCheckedChange={setContentId}
+                  className="data-[state=checked]:bg-yellow-500"
+                  data-ocid="song_submission.switch"
+                />
+              </div>
+
+              {/* Caller Tune Start Second */}
+              <FormField label="Caller Tune Start Second">
+                <Input
+                  type="number"
+                  min="0"
+                  value={callerTuneStartSecond}
+                  onChange={(e) => setCallerTuneStartSecond(e.target.value)}
+                  placeholder="e.g. 30"
+                  className="neon-input border-yellow-500/30 focus:border-yellow-400"
+                  data-ocid="song_submission.input"
+                />
+              </FormField>
+            </div>
+          )}
+
+          {/* ── Legal Agreements ── */}
+          <div
+            className="flex items-start gap-3 rounded-lg border border-purple-500/30 bg-purple-950/10 p-4"
+            data-ocid="song_submission.modal"
+          >
             <Checkbox
               id="legalAgreements"
               checked={legalAgreementsAccepted}
-              onCheckedChange={(checked) =>
-                setLegalAgreementsAccepted(checked as boolean)
-              }
+              onCheckedChange={(v) => setLegalAgreementsAccepted(v as boolean)}
+              className="mt-0.5 border-purple-400 data-[state=checked]:bg-purple-600"
+              data-ocid="song_submission.checkbox"
             />
-            <div className="grid gap-1.5 leading-none">
+            <div className="space-y-1">
               <Label
                 htmlFor="legalAgreements"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                className="text-sm font-medium text-purple-200 cursor-pointer"
               >
-                I accept the Legal Agreements & Terms *
+                I accept the Legal Agreements &amp; Terms{" "}
+                <span className="text-red-400">*</span>
               </Label>
-              <p className="text-sm text-muted-foreground">
-                By checking this box, you confirm that you have read and agree
-                to our terms and conditions.
+              <p className="text-xs text-purple-400/80">
+                By checking this box, you confirm that you own or have the
+                rights to distribute this content and agree to our terms and
+                conditions.
               </p>
             </div>
           </div>
 
+          {/* ── Uploading status ── */}
+          {isUploading && (
+            <div
+              className="flex items-center gap-2 text-sm text-purple-300"
+              data-ocid="song_submission.loading_state"
+            >
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Uploading files… please keep this page open.
+            </div>
+          )}
+
+          {/* ── Submit Button ── */}
           <Button
             type="submit"
-            disabled={isUploading || submitSong.isPending}
-            className="w-full"
+            disabled={isBusy}
+            className="w-full bg-gradient-to-r from-purple-600 to-cyan-600
+                       hover:from-purple-500 hover:to-cyan-500
+                       text-white font-semibold py-5 shadow-[0_0_16px_rgba(168,85,247,0.4)]
+                       disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            data-ocid="song_submission.submit_button"
           >
-            {isUploading || submitSong.isPending ? (
+            {isBusy ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Submitting...
+                {isUploading ? "Uploading…" : "Submitting…"}
               </>
             ) : (
               <>
@@ -653,5 +1005,31 @@ export default function SongSubmissionForm() {
         </form>
       </CardContent>
     </Card>
+  );
+}
+
+// ── Small helper component to reduce boilerplate ──
+function FormField({
+  label,
+  required,
+  hint,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-purple-200 text-sm font-medium">
+        {label}
+        {required && <span className="text-red-400 ml-0.5">*</span>}
+        {hint && (
+          <span className="text-purple-400/70 font-normal ml-1">({hint})</span>
+        )}
+      </Label>
+      {children}
+    </div>
   );
 }

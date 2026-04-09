@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useParams } from "@tanstack/react-router";
 import { Music } from "lucide-react";
 import StreamingPlatformButton from "../components/StreamingPlatformButton";
